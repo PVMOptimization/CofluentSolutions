@@ -84,7 +84,7 @@ const T = {
   bp: { mobile: 768, wide: 1280 },
   layout: { max: "1200px", maxWide: "1360px", gutter: "clamp(1rem, 4vw, 3rem)", header: "68px", callBar: "60px", protrude: "clamp(28px, calc((100vw - 1230px) / 2), 88px)" },
   motion: { ease: "cubic-bezier(0.22, 1, 0.36, 1)", fast: "180ms", base: "320ms" },
-  hero: { runDesktop: "250vh", runMobile: "190vh" },
+  scroll: { runDesktop: "260vh", runMobile: "220vh", revealStart: 0.12, revealStep: 0.2, revealSpan: 0.12 },
   spring: { stiffness: 230, damping: 32, mass: 0.3, restDelta: 0.0005 },
   focal: { x: 0.5, y: 0.5 },
   frames: { count: 120, dir: "/Plumberanimated", prefix: "ezgif-frame-", ext: ".jpg", pad: 3 },
@@ -283,7 +283,7 @@ const CSS = `
   --max: ${T.layout.max}; --gutter: ${T.layout.gutter}; --header-h: ${T.layout.header};
   --callbar-h: ${T.layout.callBar}; --protrude: ${T.layout.protrude};
   --ease: ${T.motion.ease}; --dur-fast: ${T.motion.fast}; --dur-base: ${T.motion.base};
-  --hero-run: ${T.hero.runDesktop};
+  --scroll-run: ${T.scroll.runDesktop};
   --shadow-1: 0 1px 2px rgba(24, 46, 111, 0.08), 0 0 0 1px var(--c-line);
 }
 
@@ -291,7 +291,7 @@ const CSS = `
   :root {
     --t-xs: ${T.sizeMobile.xs}; --t-sm: ${T.sizeMobile.sm}; --t-md: ${T.sizeMobile.md}; --t-lg: ${T.sizeMobile.lg};
     --t-xl: ${T.sizeMobile.xl}; --t-xxl: ${T.sizeMobile.xxl}; --t-mega: ${T.sizeMobile.mega};
-    --header-h: 56px; --hero-run: ${T.hero.runMobile};
+    --header-h: 56px; --scroll-run: ${T.scroll.runMobile};
   }
 }
 
@@ -352,19 +352,20 @@ img { display: block; max-width: 100%; }
 }
 
 /* ---------- Hero (scroll-scrubbed frame sequence) ---------- */
-.hero { position: relative; height: var(--hero-run); }
-.hero__stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--c-brand-dark) url(${frameUrl(1)}) center / cover no-repeat; }
-.hero__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero { position: relative; isolation: isolate; overflow: hidden; min-height: 100vh; min-height: 100svh; background: var(--c-brand-dark); }
+.hero__bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--c-brand-dark) url(/video/section-poster.jpg) center / cover no-repeat; }
+.hero__bg wistia-player { position: absolute; top: 50%; left: 50%; width: var(--bgw, 100%); height: calc(var(--bgw, 100%) * 9 / 16); transform: translate(-50%, -50%); display: block; }
+.hero__bg wistia-player:not(:defined) { background: center / cover no-repeat url('https://fast.wistia.com/embed/medias/${T.business.wistia.mediaId}/swatch'); filter: blur(5px); }
+.scrollsec { position: relative; height: var(--scroll-run); }
+.scrollsec__stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; color: var(--c-on-dark); background: var(--c-brand-dark) url(${frameUrl(1)}) center / cover no-repeat; }
+.scrollsec__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .hero__missing { position: absolute; z-index: 5; inset: calc(var(--header-h) + var(--s-md)) var(--gutter) auto var(--gutter); padding: var(--s-md); border-radius: var(--r-md); background: var(--c-call); color: var(--c-ink); font-weight: 700; font-size: var(--t-sm); }
-.hero__scrim { position: absolute; inset: 0; pointer-events: none; background:
-  linear-gradient(90deg, var(--c-scrim) 0%, rgba(8, 17, 44, 0.35) 48%, rgba(8, 17, 44, 0.1) 100%),
-  linear-gradient(0deg, rgba(8, 17, 44, 0.6) 0%, rgba(8, 17, 44, 0) 45%); }
 .hero__layout {
-  position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr); gap: var(--s-xl);
+  position: relative; min-height: 100vh; min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr); gap: var(--s-xl);
   align-items: end; padding: calc(var(--header-h) + var(--s-xl)) var(--gutter) var(--s-xxl);
   max-width: var(--max); margin-inline: auto; width: 100%; color: var(--c-on-dark);
 }
-.hero__copy { display: grid; gap: var(--s-md); align-self: end; }
+.hero__copy { display: grid; gap: var(--s-md); align-self: end; text-shadow: 0 2px 22px rgba(5, 10, 30, 0.55); }
 .hero__copy .eyebrow { color: var(--c-on-dark-soft); }
 .hero__title { font-family: var(--f-display); font-weight: 700; font-size: var(--t-mega); line-height: 0.95; letter-spacing: -0.03em; max-width: 13ch; }
 .hero__word { display: inline-block; margin-right: 0.24em; }
@@ -411,7 +412,6 @@ img { display: block; max-width: 100%; }
 .meter__bar { height: 100%; background: var(--c-call); transform-origin: left center; }
 
 @media (max-width: ${mq}) {
-  .hero__scrim { background: linear-gradient(180deg, rgba(8, 17, 44, 0.72) 0%, rgba(8, 17, 44, 0.1) 38%, rgba(8, 17, 44, 0.1) 52%, rgba(8, 17, 44, 0.78) 100%); }
   .hero__layout { grid-template-columns: 1fr; align-content: space-between; align-items: start; gap: var(--s-md); padding: calc(var(--header-h) + var(--s-md)) var(--gutter) calc(var(--callbar-h) + var(--s-xl) + env(safe-area-inset-bottom)); }
   .hero__copy { gap: var(--s-xs); align-self: start; }
   .hero__title { max-width: 15ch; line-height: 1; }
@@ -491,31 +491,25 @@ img { display: block; max-width: 100%; }
 .exit__close:hover { background: rgba(255, 255, 255, 0.2); }
 
 /* ---------- Process (video background section) ---------- */
-.process { position: relative; isolation: isolate; overflow: hidden; display: grid; align-items: center; min-height: min(100vh, 880px); padding-block: var(--s-section); color: var(--c-on-dark); background: var(--c-brand-dark); }
-.process__bg { position: absolute; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; transform: scale(1.04); filter: saturate(0.5) brightness(0.78) blur(1.5px); background: var(--c-brand-dark) url(/video/section-poster.jpg) center / cover no-repeat; }
-.process__bg wistia-player { position: absolute; top: 50%; left: 50%; width: var(--bgw, 100%); height: calc(var(--bgw, 100%) * 9 / 16); transform: translate(-50%, -50%); display: block; }
-.process__bg wistia-player:not(:defined) { background: center / cover no-repeat url('https://fast.wistia.com/embed/medias/${T.business.wistia.mediaId}/swatch'); filter: blur(5px); }
-.process__shade { position: absolute; inset: 0; z-index: -1; background:
-  radial-gradient(120% 90% at 50% 50%, rgba(5, 10, 30, 0) 30%, rgba(5, 10, 30, 0.7) 100%),
-  linear-gradient(100deg, rgba(5, 10, 30, 0.95) 0%, rgba(8, 17, 44, 0.84) 45%, rgba(8, 17, 44, 0.58) 100%),
-  linear-gradient(0deg, rgba(5, 10, 30, 0.85) 0%, rgba(5, 10, 30, 0) 50%); }
-.process .eyebrow { color: var(--c-on-dark-soft); }
-.process__title { margin-top: var(--s-sm); max-width: 16ch; font-family: var(--f-display); font-weight: 700; font-size: var(--t-mega); line-height: 0.98; letter-spacing: -0.03em; }
-.process__steps { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-md); margin-top: var(--s-xxl); }
-.step { padding: var(--s-lg); display: grid; gap: var(--s-sm); align-content: start; min-height: 230px; }
+.process__layout { position: absolute; inset: 0; display: grid; grid-template-rows: auto 1fr auto; width: 100%; max-width: var(--max); margin-inline: auto; padding: calc(var(--header-h) + var(--s-xl)) var(--gutter) calc(var(--s-xxl) + var(--s-lg)); }
+.process__head { text-shadow: 0 2px 22px rgba(5, 10, 30, 0.6); }
+.process__head .eyebrow { color: var(--c-on-dark-soft); }
+.process__title { margin-top: var(--s-sm); max-width: 18ch; font-family: var(--f-display); font-weight: 700; font-size: var(--t-xxl); line-height: 1; letter-spacing: -0.03em; }
+.process__steps { grid-row: 3; list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-md); }
+.step { padding: var(--s-lg); display: grid; gap: var(--s-sm); align-content: start; min-height: 200px; }
 .step__n { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xxl); line-height: 1; color: transparent; -webkit-text-stroke: 1.5px var(--c-call); }
 .step__t { font-family: var(--f-display); font-weight: 500; font-size: var(--t-lg); line-height: 1.15; }
-.step__b { font-size: var(--t-sm); color: var(--c-on-dark-soft); }
-.process__cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-lg); margin-top: var(--s-xl); }
-.process__facts { list-style: none; display: flex; flex-wrap: wrap; gap: var(--s-xs) var(--s-lg); font-size: var(--t-sm); }
-.process__facts span { font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-on-dark-soft); margin-right: var(--s-xs); }
-@media (max-width: 1024px) { .process__steps { grid-template-columns: repeat(2, 1fr); } }
+.step__b { font-size: var(--t-sm); color: var(--c-on-dark); }
+.trust { padding-block: var(--s-lg); background: var(--c-paper); border-bottom: 1px solid var(--c-line); }
+.trust__list { list-style: none; display: flex; flex-wrap: wrap; gap: var(--s-xs) var(--s-xl); font-size: var(--t-sm); color: var(--c-brand); font-weight: 500; }
+.trust__list span { font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-soft); margin-right: var(--s-xs); }
+@media (max-width: 1024px) { .process__steps { grid-template-columns: repeat(2, 1fr); } .step { min-height: 0; } }
 @media (max-width: ${mq}) {
-  .process { min-height: 0; }
-  .process__shade { background: linear-gradient(180deg, rgba(8, 17, 44, 0.92) 0%, rgba(8, 17, 44, 0.8) 100%); }
-  .process__steps { grid-template-columns: 1fr; gap: var(--s-sm); margin-top: var(--s-xl); }
-  .step { min-height: 0; grid-template-columns: auto 1fr; column-gap: var(--s-md); padding: var(--s-md); }
+  .process__layout { padding: calc(var(--header-h) + var(--s-md)) var(--gutter) calc(var(--callbar-h) + var(--s-xxl)); }
+  .process__steps { grid-template-columns: 1fr; gap: var(--s-xs); }
+  .step { grid-template-columns: auto 1fr; column-gap: var(--s-md); padding: var(--s-sm) var(--s-md); }
   .step__n { grid-row: span 2; font-size: var(--t-xl); }
+  .step__b { font-size: var(--t-xs); }
 }
 
 /* ---------- Triage ---------- */
@@ -663,7 +657,7 @@ interface VideoScrollEngineProps {
 }
 
 function VideoScrollEngine({ onStatus, children }: VideoScrollEngineProps) {
-  const heroRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const lastDrawn = useRef<number>(-1);
@@ -672,7 +666,7 @@ function VideoScrollEngine({ onStatus, children }: VideoScrollEngineProps) {
   const [failed, setFailed] = useState<number>(0);
   const ready = settled >= T.frames.count;
 
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end end"] });
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
   const progress = useSpring(scrollYProgress, T.spring);
   const progressRef = useRef<MotionValue<number>>(progress);
   progressRef.current = progress;
@@ -771,33 +765,25 @@ function VideoScrollEngine({ onStatus, children }: VideoScrollEngineProps) {
   }, [ready, framesMissing, onStatus]);
 
   return (
-    <>
-      <section className="hero" ref={heroRef} id="top" aria-label="Plumbing connection, from disconnected to connected">
-        <div className="hero__stick">
-          <canvas className="hero__canvas" ref={canvasRef} aria-hidden="true" />
-          <div className="hero__scrim" />
-          {framesMissing && (
-            <p className="hero__missing" role="alert">
-              Hero frames did not load. Check that the folder public{T.frames.dir} was uploaded in full ({T.frames.count} files named {T.frames.prefix}001{T.frames.ext} to {T.frames.prefix}
-              {T.frames.count}
-              {T.frames.ext}).
-            </p>
-          )}
-          {children({ progress, stage })}
-        </div>
-      </section>
-    </>
+    <section className="scrollsec" ref={sectionRef} id="process" aria-label="What happens when you call">
+      <div className="scrollsec__stick">
+        <canvas className="scrollsec__canvas" ref={canvasRef} aria-hidden="true" />
+        {framesMissing && (
+          <p className="hero__missing" role="alert">
+            Scroll frames did not load. Check that the folder public{T.frames.dir} was uploaded in full ({T.frames.count} files named {T.frames.prefix}001{T.frames.ext} to {T.frames.prefix}
+            {T.frames.count}
+            {T.frames.ext}).
+          </p>
+        )}
+        {children({ progress, stage })}
+      </div>
+    </section>
   );
 }
 
 /* ==========================================================================
    HERO
    ========================================================================== */
-interface HeroSectionProps {
-  progress: MotionValue<number>;
-  stage: MotionValue<number>;
-}
-
 function StageReadout({ stage }: { stage: MotionValue<number> }) {
   const [index, setIndex] = useState<number>(stage.get());
   useMotionValueEvent(stage, "change", setIndex);
@@ -881,10 +867,10 @@ function LeadForm() {
   );
 }
 
-function HeroSection({ progress, stage }: HeroSectionProps) {
-  const hintOpacity = useTransform(progress, [0, 0.05], [1, 0]);
+function HeroSection() {
   return (
-    <>
+    <section className="hero" id="top" aria-label="Cofulent Solutions, Fort Worth plumbing">
+      <WistiaBackground />
       <div className="hero__layout">
         <div className="hero__copy">
           <p className="eyebrow">{T.business.name} · Fort Worth, TX</p>
@@ -910,18 +896,7 @@ function HeroSection({ progress, stage }: HeroSectionProps) {
           <LeadForm />
         </div>
       </div>
-      <div className="meter" aria-hidden="true">
-        <div className="meter__row">
-          <StageReadout stage={stage} />
-          <motion.span className="meter__hint" style={{ opacity: hintOpacity }}>
-            Scroll to connect
-          </motion.span>
-        </div>
-        <div className="meter__track">
-          <motion.div className="meter__bar" style={{ scaleX: progress }} />
-        </div>
-      </div>
-    </>
+    </section>
   );
 }
 
@@ -1155,7 +1130,7 @@ function WhySection() {
               <p className="photo-missing">Image not found</p>
             ) : (
               <img
-                src="/images/why-1200x900.jpg"
+                src={whySrc}
                 alt="Completed pipe connection at a home foundation"
                 width={1200}
                 height={900}
@@ -1243,7 +1218,7 @@ function JobsSection() {
 }
 
 /* ==========================================================================
-   PROCESS: looping video background > gradient overlay > substance on top
+   WISTIA BACKGROUND: looping, muted, no controls, fills its parent like object-fit: cover
    ========================================================================== */
 function addScriptOnce(src: string, isModule: boolean): void {
   if (document.querySelector(`script[src="${src}"]`)) return;
@@ -1254,22 +1229,20 @@ function addScriptOnce(src: string, isModule: boolean): void {
   document.head.appendChild(el);
 }
 
-function ProcessSection() {
-  const sectionRef = useRef<HTMLElement>(null);
+function WistiaBackground() {
   const bgRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<WistiaPlayerElement>(null);
-  const inView = useInView(sectionRef, { margin: "120px" });
+  const inView = useInView(bgRef, { margin: "120px" });
   const reduceMotion = useReducedMotion();
-  const facts = TRUST_FACTS.filter((f) => f.value.trim() !== "");
 
-  // Load Wistia's player and this video's embed script once (same scripts as the Wistia embed code).
+  // Same scripts as Wistia's embed code, loaded once.
   useEffect(() => {
     if (reduceMotion) return;
     addScriptOnce(T.business.wistia.playerSrc, false);
     addScriptOnce(T.business.wistia.embedSrc, true);
   }, [reduceMotion]);
 
-  // "Cover" sizing: scale the 16:9 player so it always fills the section, like object-fit: cover.
+  // "Cover" sizing: scale the 16:9 player so it always fills the section.
   useEffect(() => {
     const bg = bgRef.current;
     if (!bg) return;
@@ -1299,65 +1272,88 @@ function ProcessSection() {
   }, [inView, reduceMotion]);
 
   return (
-    <section className="process" id="process" ref={sectionRef} aria-labelledby="process-title">
-      <div className="process__bg" ref={bgRef} aria-hidden="true">
-        {!reduceMotion && (
-          <wistia-player
-            ref={playerRef}
-            media-id={T.business.wistia.mediaId}
-            aspect="1.7777777777777777"
-            autoplay="true"
-            muted="true"
-            silent-autoplay="allow"
-            end-video-behavior="loop"
-            controls-visible-on-load="false"
-            play-bar-control="false"
-            play-pause-control="false"
-            big-play-button="false"
-            volume-control="false"
-            fullscreen-control="false"
-            settings-control="false"
-          />
-        )}
-      </div>
-      <div className="process__shade" />
-      <div className="wrap process__inner">
-        <p className="eyebrow">What happens when you call</p>
-        <h2 className="process__title" id="process-title">
-          No guessing. Here is the whole job, start to finish.
-        </h2>
+    <div className="hero__bg" ref={bgRef} aria-hidden="true">
+      {!reduceMotion && (
+        <wistia-player
+          ref={playerRef}
+          media-id={T.business.wistia.mediaId}
+          aspect="1.7777777777777777"
+          autoplay="true"
+          muted="true"
+          silent-autoplay="allow"
+          end-video-behavior="loop"
+          controls-visible-on-load="false"
+          play-bar-control="false"
+          play-pause-control="false"
+          big-play-button="false"
+          volume-control="false"
+          fullscreen-control="false"
+          settings-control="false"
+        />
+      )}
+    </div>
+  );
+}
+
+/* ==========================================================================
+   PROCESS: scroll-scrubbed frames as the background, cards 01-04 revealed by scroll position
+   ========================================================================== */
+function StepCard({ step, index, progress }: { step: Step; index: number; progress: MotionValue<number> }) {
+  const start = T.scroll.revealStart + index * T.scroll.revealStep;
+  const end = start + T.scroll.revealSpan;
+  const opacity = useTransform(progress, [start, end], [0, 1]);
+  const y = useTransform(progress, [start, end], [48, 0]);
+  return (
+    <motion.li className="step glass" style={{ opacity, y }}>
+      <span className="step__n">{step.n}</span>
+      <h3 className="step__t">{step.title}</h3>
+      <p className="step__b">{step.body}</p>
+    </motion.li>
+  );
+}
+
+function ProcessSection({ progress, stage }: { progress: MotionValue<number>; stage: MotionValue<number> }) {
+  return (
+    <>
+      <div className="process__layout">
+        <div className="process__head">
+          <p className="eyebrow">What happens when you call</p>
+          <h2 className="process__title">No guessing. Here is the whole job, start to finish.</h2>
+        </div>
         <ol className="process__steps">
           {STEPS.map((step, i) => (
-            <motion.li
-              className="step glass"
-              key={step.n}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10% 0px" }}
-              transition={{ delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <span className="step__n">{step.n}</span>
-              <h3 className="step__t">{step.title}</h3>
-              <p className="step__b">{step.body}</p>
-            </motion.li>
+            <StepCard key={step.n} step={step} index={i} progress={progress} />
           ))}
         </ol>
-        <div className="process__cta">
-          <a className="call-btn" href={T.business.phoneHref}>
-            Call {T.business.phoneDisplay}
-          </a>
-          {facts.length > 0 && (
-            <ul className="process__facts">
-              {facts.map((f) => (
-                <li key={f.label}>
-                  <span>{f.label}</span> {f.value}
-                </li>
-              ))}
-            </ul>
-          )}
+      </div>
+      <div className="meter" aria-hidden="true">
+        <div className="meter__row">
+          <StageReadout stage={stage} />
+        </div>
+        <div className="meter__track">
+          <motion.div className="meter__bar" style={{ scaleX: progress }} />
         </div>
       </div>
-    </section>
+    </>
+  );
+}
+
+function TrustFacts() {
+  const facts = TRUST_FACTS.filter((f) => f.value.trim() !== "");
+  if (facts.length === 0) return null;
+  return (
+    <div className="trust">
+      <div className="wrap">
+        <ul className="trust__list">
+          {facts.map((f) => (
+            <li key={f.label}>
+              <span>{f.label}</span>
+              {f.value}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
@@ -1612,10 +1608,11 @@ export default function App() {
       <style>{CSS}</style>
       <Header />
       <main>
-        <VideoScrollEngine onStatus={setFramesStatus}>{({ progress, stage }) => <HeroSection progress={progress} stage={stage} />}</VideoScrollEngine>
+        <HeroSection />
         <StatsStrip />
         <ServicesSection />
-        <ProcessSection />
+        <VideoScrollEngine onStatus={setFramesStatus}>{({ progress, stage }) => <ProcessSection progress={progress} stage={stage} />}</VideoScrollEngine>
+        <TrustFacts />
         <TriageSection />
         <WhySection />
         <JobsSection />
