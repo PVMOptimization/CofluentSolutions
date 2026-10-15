@@ -62,6 +62,8 @@ const T = {
     glassEdge: "rgba(255, 255, 255, 0.32)",
     onDark: "#F4F8FF",
     onDarkSoft: "rgba(244, 248, 255, 0.76)",
+    aqua: "#8EC5F5", // water accent: replaces orange everywhere except call actions
+    aquaDeep: "#2F6FB5",
     call: "#F26B1D", // used only for call-to-action surfaces
     scrim: "rgba(8, 17, 44, 0.78)",
   },
@@ -82,16 +84,19 @@ const T = {
   },
   sizeMobile: { xs: "0.6875rem", sm: "0.8125rem", md: "0.9375rem", lg: "1.0625rem", xl: "1.5rem", xxl: "2rem", mega: "2.375rem" },
   bp: { mobile: 768, wide: 1280 },
-  layout: { max: "1200px", maxWide: "1360px", gutter: "clamp(1rem, 4vw, 3rem)", header: "68px", callBar: "60px", protrude: "clamp(28px, calc((100vw - 1230px) / 2), 88px)" },
+  layout: { max: "1200px", maxWide: "1360px", gutter: "clamp(1rem, 4vw, 3rem)", header: "68px", callBar: "60px", protrude: "clamp(28px, calc((100vw - 1230px) / 2), 88px)", wave: "clamp(32px, 5vw, 64px)", meterMin: 1280 },
+  map: { w: 800, h: 520, pad: 50, lonMin: -97.5, lonSpan: 0.45, latMax: 32.97, latSpan: 0.42, home: "Fort Worth", rotateMs: 2600 },
   motion: { ease: "cubic-bezier(0.22, 1, 0.36, 1)", fast: "180ms", base: "320ms" },
   scroll: { runDesktop: "260vh", runMobile: "220vh", revealStart: 0.12, revealStep: 0.2, revealSpan: 0.12 },
   spring: { stiffness: 230, damping: 32, mass: 0.3, restDelta: 0.0005 },
   focal: { x: 0.5, y: 0.5 },
   frames: { count: 120, dir: "/Plumberanimated", prefix: "ezgif-frame-", ext: ".jpg", pad: 3 },
   business: {
-    name: "Cofulent Solutions",
+    name: "Confluent Solutions",
     phoneDisplay: "817-999-7363",
     phoneHref: "tel:+18179997363",
+    smsNumber: "+18179997363",
+    smsBody: "Hi Confulent Solutions, I need help with: ",
     address: "1319 Madeline Pl, Fort Worth, Texas 76107",
     leadEndpoint: "/api/lead",
     logoCandidates: ["/logo.png", "/Logo.png", "/logo.PNG", "/logo.webp", "/logo.svg", "/logo.jpg"] as readonly string[], // first one that exists is used; save yours in public/
@@ -118,23 +123,30 @@ const SERVICES: readonly string[] = [
   "Residential Plumbing Repairs",
 ];
 
-const SERVICE_AREAS: readonly string[] = [
-  "Fort Worth",
-  "Haltom City",
-  "Richland Hills",
-  "White Settlement",
-  "Saginaw",
-  "Forest Hill",
-  "North Richland Hills",
-  "Watauga",
-  "Hurst",
-  "Euless",
-  "Bedford",
-  "Colleyville",
-  "Keller",
-  "Southlake",
-  "Crowley",
+interface AreaGeo {
+  name: string;
+  lat: number;
+  lon: number;
+}
+const AREA_GEO: readonly AreaGeo[] = [
+  { name: "Fort Worth", lat: 32.75, lon: -97.33 },
+  { name: "Haltom City", lat: 32.8, lon: -97.27 },
+  { name: "Richland Hills", lat: 32.81, lon: -97.23 },
+  { name: "White Settlement", lat: 32.76, lon: -97.46 },
+  { name: "Saginaw", lat: 32.86, lon: -97.36 },
+  { name: "Forest Hill", lat: 32.67, lon: -97.27 },
+  { name: "North Richland Hills", lat: 32.83, lon: -97.23 },
+  { name: "Watauga", lat: 32.86, lon: -97.25 },
+  { name: "Hurst", lat: 32.82, lon: -97.19 },
+  { name: "Euless", lat: 32.84, lon: -97.08 },
+  { name: "Bedford", lat: 32.84, lon: -97.14 },
+  { name: "Colleyville", lat: 32.88, lon: -97.15 },
+  { name: "Keller", lat: 32.93, lon: -97.25 },
+  { name: "Southlake", lat: 32.94, lon: -97.13 },
+  { name: "Crowley", lat: 32.58, lon: -97.36 },
 ];
+const SERVICE_AREAS: readonly string[] = AREA_GEO.map((area) => area.name);
+const ROTATING_LINES: readonly string[] = ["Slab leaks.", "Gas lines.", "Sewer backups.", "Water heaters.", "Burst pipes.", "Repiping."];
 
 // Drop a photo at /public/services/<slug>.jpg and the card uses it automatically. Index-aligned with SERVICES.
 const SERVICE_SLUGS: readonly string[] = [
@@ -254,8 +266,8 @@ const NAV_LINKS: readonly { href: string; label: string }[] = [
   { href: "#triage", label: "Is It Urgent?" },
   { href: "#why", label: "Why Us" },
   { href: "#jobs", label: "Job Files" },
-  { href: "#faq", label: "FAQ" },
   { href: "#areas", label: "Areas" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 /* ==========================================================================
@@ -273,7 +285,7 @@ const CSS = `
   --c-ink: ${T.color.ink}; --c-ink-soft: ${T.color.inkSoft}; --c-line: ${T.color.line};
   --c-glass-light: ${T.color.glassLight}; --c-glass-dark: ${T.color.glassDark}; --c-glass-edge: ${T.color.glassEdge};
   --c-on-dark: ${T.color.onDark}; --c-on-dark-soft: ${T.color.onDarkSoft};
-  --c-call: ${T.color.call}; --c-scrim: ${T.color.scrim};
+  --c-aqua: ${T.color.aqua}; --c-aqua-deep: ${T.color.aquaDeep}; --c-call: ${T.color.call}; --c-scrim: ${T.color.scrim};
   --s-xs: ${T.space.xs}; --s-sm: ${T.space.sm}; --s-md: ${T.space.md}; --s-lg: ${T.space.lg};
   --s-xl: ${T.space.xl}; --s-xxl: ${T.space.xxl}; --s-section: ${T.space.section};
   --r-sm: ${T.radius.sm}; --r-md: ${T.radius.md}; --r-lg: ${T.radius.lg};
@@ -281,7 +293,7 @@ const CSS = `
   --t-xs: ${T.size.xs}; --t-sm: ${T.size.sm}; --t-md: ${T.size.md}; --t-lg: ${T.size.lg};
   --t-xl: ${T.size.xl}; --t-xxl: ${T.size.xxl}; --t-mega: ${T.size.mega};
   --max: ${T.layout.max}; --gutter: ${T.layout.gutter}; --header-h: ${T.layout.header};
-  --callbar-h: ${T.layout.callBar}; --protrude: ${T.layout.protrude};
+  --callbar-h: ${T.layout.callBar}; --protrude: ${T.layout.protrude}; --wave-h: ${T.layout.wave};
   --ease: ${T.motion.ease}; --dur-fast: ${T.motion.fast}; --dur-base: ${T.motion.base};
   --scroll-run: ${T.scroll.runDesktop};
   --shadow-1: 0 1px 2px rgba(24, 46, 111, 0.08), 0 0 0 1px var(--c-line);
@@ -309,7 +321,7 @@ body {
 a { color: inherit; text-decoration: none; }
 button, input, select { font: inherit; color: inherit; }
 img { display: block; max-width: 100%; }
-:focus-visible { outline: 3px solid var(--c-call); outline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--c-aqua-deep); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; } }
 
 .wrap { width: 100%; max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
@@ -369,8 +381,30 @@ img { display: block; max-width: 100%; }
 .hero__copy .eyebrow { color: var(--c-on-dark-soft); }
 .hero__title { font-family: var(--f-display); font-weight: 700; font-size: var(--t-mega); line-height: 0.95; letter-spacing: -0.03em; max-width: 13ch; }
 .hero__word { display: inline-block; margin-right: 0.24em; }
-.hero__phone { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xxl); letter-spacing: -0.02em; line-height: 1; width: fit-content; border-bottom: 3px solid var(--c-call); padding-bottom: var(--s-xs); transition: color var(--dur-fast); }
-.hero__phone:hover { color: var(--c-call); }
+.hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-lg) var(--s-xl); }
+.text-btn { display: inline-flex; align-items: center; gap: var(--s-md); padding: var(--s-sm) var(--s-lg) var(--s-sm) var(--s-sm); border-radius: 999px; color: var(--c-on-dark); text-shadow: none; transition: transform var(--dur-base) var(--ease), border-color var(--dur-fast); }
+.text-btn:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.7); }
+.text-btn__icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--c-call); color: var(--c-ink); box-shadow: 0 2px 10px rgba(242, 107, 29, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
+.text-btn__icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.text-btn__icon circle { fill: currentColor; stroke: none; }
+.text-btn__label { display: grid; line-height: 1.15; text-align: left; }
+.text-btn__label strong { font-family: var(--f-display); font-weight: 700; font-size: var(--t-lg); }
+.text-btn__label small { font-size: var(--t-xs); color: var(--c-on-dark-soft); letter-spacing: 0.02em; }
+.text-fab { display: none; }
+@media (max-width: ${mq}) {
+  .hero__actions { display: none; }
+  .text-fab {
+    display: inline-flex; align-items: center; gap: var(--s-sm); position: fixed; z-index: 55; right: var(--gutter);
+    bottom: calc(var(--callbar-h) + env(safe-area-inset-bottom) + var(--s-md)); padding: 6px var(--s-lg) 6px 6px; border-radius: 999px;
+    background: linear-gradient(140deg, rgba(24, 46, 111, 0.88), rgba(14, 29, 74, 0.88)); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.28); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 18px rgba(8, 17, 44, 0.35);
+    color: var(--c-on-dark); font-family: var(--f-display); font-weight: 700; font-size: var(--t-md);
+  }
+  .text-fab .text-btn__icon { width: 40px; height: 40px; animation: nudge 5s ease-in-out 3s infinite; }
+}
+@keyframes nudge { 0%, 92%, 100% { transform: scale(1); } 96% { transform: scale(1.14); } }
+.hero__phone { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xxl); letter-spacing: -0.02em; line-height: 1; width: fit-content; border-bottom: 3px solid var(--c-aqua); padding-bottom: var(--s-xs); transition: color var(--dur-fast); }
+.hero__phone:hover { color: var(--c-aqua); }
 .hero__side { align-self: center; }
 
 .glass {
@@ -409,10 +443,10 @@ img { display: block; max-width: 100%; }
 .meter__stage { font-variant-numeric: tabular-nums; }
 .meter__hint { color: var(--c-on-dark-soft); }
 .meter__track { height: 2px; background: rgba(255, 255, 255, 0.28); overflow: hidden; }
-.meter__bar { height: 100%; background: var(--c-call); transform-origin: left center; }
+.meter__bar { height: 100%; background: var(--c-aqua); transform-origin: left center; }
 
 @media (max-width: ${mq}) {
-  .hero__layout { grid-template-columns: 1fr; align-content: space-between; align-items: start; gap: var(--s-md); padding: calc(var(--header-h) + var(--s-md)) var(--gutter) calc(var(--callbar-h) + var(--s-xl) + env(safe-area-inset-bottom)); }
+  .hero__layout { grid-template-columns: 1fr; align-content: space-between; align-items: start; gap: var(--s-md); padding: calc(var(--header-h) + var(--s-md)) var(--gutter) calc(var(--callbar-h) + var(--s-xxl) + var(--s-lg) + env(safe-area-inset-bottom)); }
   .hero__copy { gap: var(--s-xs); align-self: start; }
   .hero__title { max-width: 15ch; line-height: 1; }
   .hero__phone { display: none; }
@@ -497,7 +531,7 @@ img { display: block; max-width: 100%; }
 .process__title { margin-top: var(--s-sm); max-width: 18ch; font-family: var(--f-display); font-weight: 700; font-size: var(--t-xxl); line-height: 1; letter-spacing: -0.03em; }
 .process__steps { grid-row: 3; list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-md); }
 .step { padding: var(--s-lg); display: grid; gap: var(--s-sm); align-content: start; min-height: 200px; }
-.step__n { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xxl); line-height: 1; color: transparent; -webkit-text-stroke: 1.5px var(--c-call); }
+.step__n { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xxl); line-height: 1; color: transparent; -webkit-text-stroke: 1.5px var(--c-aqua); }
 .step__t { font-family: var(--f-display); font-weight: 500; font-size: var(--t-lg); line-height: 1.15; }
 .step__b { font-size: var(--t-sm); color: var(--c-on-dark); }
 .trust { padding-block: var(--s-lg); background: var(--c-paper); border-bottom: 1px solid var(--c-line); }
@@ -521,7 +555,7 @@ img { display: block; max-width: 100%; }
 .triage__result { position: relative; display: grid; align-content: space-between; gap: var(--s-lg); padding: var(--s-xl); min-height: 320px; border-radius: var(--r-lg); background: var(--c-brand); color: var(--c-on-dark); overflow: hidden; box-shadow: var(--shadow-1); }
 .triage__result::before { content: ""; position: absolute; inset: -40% -20% auto auto; width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.16), transparent 65%); pointer-events: none; }
 .pill { width: fit-content; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; background: rgba(255, 255, 255, 0.16); border: 1px solid var(--c-glass-edge); }
-.pill--now { background: var(--c-call); color: var(--c-ink); border-color: transparent; }
+.pill--now { background: var(--c-aqua-deep); color: #fff; border-color: transparent; }
 .triage__head { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xl); line-height: 1.05; margin-top: var(--s-sm); }
 .triage__advice { margin-top: var(--s-sm); font-size: var(--t-lg); color: var(--c-on-dark-soft); max-width: 34rem; }
 @media (max-width: 1024px) { .triage__grid { grid-template-columns: 1fr; } }
@@ -544,8 +578,8 @@ img { display: block; max-width: 100%; }
 .why__frame { position: relative; aspect-ratio: 4 / 3; }
 .why__image { position: absolute; inset: 0; isolation: isolate; overflow: hidden; border-radius: var(--r-md); box-shadow: var(--shadow-1); background: var(--c-brand-dark); }
 .why__image img { width: 100%; height: 100%; object-fit: cover; }
-.why__spot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px solid #fff; background: rgba(242, 107, 29, 0.85); box-shadow: 0 0 0 0 rgba(242, 107, 29, 0.55); animation: pulse 2s ease-out infinite; }
-@keyframes pulse { to { box-shadow: 0 0 0 18px rgba(242, 107, 29, 0); } }
+.why__spot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px solid #fff; background: rgba(142, 197, 245, 0.85); box-shadow: 0 0 0 0 rgba(142, 197, 245, 0.7); animation: pulse 2s ease-out infinite; }
+@keyframes pulse { to { box-shadow: 0 0 0 18px rgba(142, 197, 245, 0); } }
 .why__caption { position: absolute; inset: auto var(--s-lg) var(--s-lg) var(--s-lg); max-width: 28rem; padding: var(--s-md) var(--s-lg); color: var(--c-on-dark); font-size: var(--t-md); }
 .why__list { list-style: none; }
 .why__list li { display: contents; }
@@ -584,7 +618,7 @@ img { display: block; max-width: 100%; }
 .compare__handle { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; pointer-events: none; }
 .compare__handle::after { content: "\\2194"; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; display: grid; place-items: center; border-radius: 50%; background: var(--c-glass-light); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--c-brand); font-weight: 700; box-shadow: var(--shadow-1); }
 .compare__range { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; margin: 0; }
-.compare:focus-within { outline: 3px solid var(--c-call); outline-offset: 3px; }
+.compare:focus-within { outline: 3px solid var(--c-aqua-deep); outline-offset: 3px; }
 .jobs__note { margin-top: var(--s-md); font-size: var(--t-sm); color: var(--c-ink-soft); }
 @media (max-width: ${mq}) {
   .compare { aspect-ratio: 4 / 5; margin-inline: calc(var(--gutter) * -1); border-radius: 0; }
@@ -601,13 +635,96 @@ img { display: block; max-width: 100%; }
 .areas__cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-lg); margin-top: var(--s-xl); }
 .areas__addr { color: var(--c-ink-soft); font-size: var(--t-sm); }
 
+/* ---------- Water: liquid glass, eyebrow droplet, mesh, rhythm ---------- */
+.eyebrow { display: inline-flex; align-items: center; gap: var(--s-xs); }
+.eyebrow::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: linear-gradient(135deg, #fff, var(--c-aqua-deep)); box-shadow: 0 0 0 1px rgba(47, 111, 181, 0.35); }
+.hero .eyebrow::before, .areas .eyebrow::before { background: linear-gradient(135deg, #fff, var(--c-aqua)); box-shadow: none; }
+.card {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.78), rgba(196, 223, 250, 0.5));
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -10px 24px rgba(142, 197, 245, 0.18), 0 8px 24px rgba(24, 46, 111, 0.08), 0 0 0 1px var(--c-line);
+}
+.mesh {
+  background-color: var(--c-bg);
+  background-image:
+    radial-gradient(38% 30% at 10% 32%, rgba(142, 197, 245, 0.6), transparent 72%),
+    radial-gradient(34% 28% at 90% 52%, rgba(255, 255, 255, 0.75), transparent 72%),
+    radial-gradient(42% 30% at 58% 80%, rgba(120, 170, 230, 0.38), transparent 72%);
+}
+.why {
+  background-image:
+    radial-gradient(36% 28% at 86% 24%, rgba(142, 197, 245, 0.55), transparent 72%),
+    radial-gradient(40% 30% at 12% 74%, rgba(255, 255, 255, 0.55), transparent 72%);
+}
+
+/* ---------- Animated headings ---------- */
+.reveal { display: block; }
+.reveal__mask { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.14em; margin-bottom: -0.14em; margin-right: 0.24em; }
+.reveal__word { display: inline-block; will-change: transform; }
+
+/* ---------- Wave dividers ---------- */
+.wave { position: relative; height: var(--wave-h); overflow: hidden; line-height: 0; background: var(--w-from); }
+.wave__svg { position: absolute; left: 0; bottom: -1px; width: 200%; height: 100%; animation: drift 30s linear infinite; }
+.wave__svg--slow { animation-duration: 46s; animation-direction: reverse; }
+.wave__fill { fill: var(--w-to); }
+.wave__sheen { fill: var(--c-aqua); opacity: 0.4; }
+.wave--bg-deep { --w-from: var(--c-bg); --w-to: var(--c-bg-deep); }
+.wave--deep-bg { --w-from: var(--c-bg-deep); --w-to: var(--c-bg); }
+.wave--deep-navy { --w-from: var(--c-bg-deep); --w-to: var(--c-brand-dark); }
+.wave--navy-bg { --w-from: var(--c-brand-dark); --w-to: var(--c-bg); }
+.wave--bg-brand { --w-from: var(--c-bg); --w-to: var(--c-brand); }
+@keyframes drift { to { transform: translateX(-50%); } }
+
+/* ---------- Rotating line under the hero headline ---------- */
+.hero__rotor { display: flex; align-items: baseline; gap: var(--s-sm); flex-wrap: nowrap; font-family: var(--f-display); font-weight: 500; font-size: var(--t-xl); line-height: 1.2; min-height: 1.5em; }
+.hero__rotor-label { color: var(--c-on-dark-soft); white-space: nowrap; }
+.hero__rotor-slot { position: relative; display: inline-block; min-width: 9.5ch; padding-bottom: 4px; border-bottom: 2px solid var(--c-aqua); color: var(--c-aqua); white-space: nowrap; overflow: hidden; }
+.hero__rotor-word { display: inline-block; }
+@media (max-width: ${mq}) { .hero__rotor { font-size: var(--t-lg); } .hero__rotor-slot { min-width: 8.5ch; } }
+
+/* ---------- Water-level scroll indicator ---------- */
+.watermeter { position: fixed; z-index: 40; right: 4px; top: 50%; width: 6px; height: 36vh; transform: translateY(-50%); border-radius: 999px; overflow: hidden; pointer-events: none; background: rgba(255, 255, 255, 0.4); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: inset 0 0 0 1px rgba(24, 46, 111, 0.28), 0 0 10px rgba(142, 197, 245, 0.55); }
+.watermeter__fill { position: absolute; inset: 0; transform-origin: bottom center; background: linear-gradient(to top, var(--c-aqua-deep), var(--c-aqua)); }
+@media (max-width: ${T.layout.meterMin - 1}px) { .watermeter { display: none; } }
+
+/* ---------- Service-area map ---------- */
+.areas { background: var(--c-brand-dark); color: var(--c-on-dark); background-image: radial-gradient(38% 30% at 16% 48%, rgba(47, 111, 181, 0.55), transparent 72%), radial-gradient(34% 26% at 88% 70%, rgba(142, 197, 245, 0.22), transparent 72%); }
+.areas .eyebrow { color: var(--c-on-dark-soft); }
+.areas .h2 { color: var(--c-on-dark); }
+.areas__addr { color: var(--c-on-dark-soft); }
+.map { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--s-xl); align-items: center; margin-top: var(--s-xl); }
+.map__panel { padding: var(--s-sm); border-radius: var(--r-lg); background: linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(142, 197, 245, 0.07)); border: 1px solid var(--c-glass-edge); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 18px 48px rgba(3, 9, 28, 0.4); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.map__svg { display: block; width: 100%; height: auto; }
+.map__grid { stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; }
+.map__water { fill: rgba(142, 197, 245, 0.26); stroke: rgba(142, 197, 245, 0.55); stroke-width: 1.5; }
+.map__river { fill: none; stroke: rgba(142, 197, 245, 0.55); stroke-width: 4; stroke-linecap: round; }
+.map__dot { fill: rgba(244, 248, 255, 0.85); transition: fill var(--dur-fast), r var(--dur-fast); }
+.map__node { cursor: pointer; }
+.map__node.is-active .map__dot { fill: var(--c-aqua); }
+.map__ring { fill: none; stroke: var(--c-aqua); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: ripple 2.4s ease-out infinite; }
+.map__ring--late { animation-delay: 1.2s; }
+.map__label { font-family: var(--f-display); font-weight: 700; font-size: 20px; fill: var(--c-on-dark); paint-order: stroke; stroke: var(--c-brand-dark); stroke-width: 5px; stroke-linejoin: round; }
+.map__legend { fill: rgba(244, 248, 255, 0.6); font-family: var(--f-body); font-size: 13px; letter-spacing: 0.06em; }
+@keyframes ripple { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(3.4); opacity: 0; } }
+.map__side { display: grid; gap: var(--s-lg); }
+.map__figs { display: flex; gap: var(--s-xl); }
+.map__n { display: block; font-family: var(--f-display); font-weight: 700; font-size: var(--t-xxl); line-height: 1; font-variant-numeric: tabular-nums; color: var(--c-aqua); }
+.map__cap { display: block; margin-top: var(--s-xs); font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-on-dark-soft); }
+.map__now { font-size: var(--t-lg); line-height: 1.35; min-height: 2.7em; color: var(--c-on-dark); }
+.map__chips { list-style: none; display: flex; flex-wrap: wrap; gap: var(--s-xs); }
+.map__chip { padding: 6px var(--s-md); border-radius: 999px; cursor: pointer; font-size: var(--t-sm); font-weight: 500; color: var(--c-on-dark); background: rgba(255, 255, 255, 0.1); border: 1px solid var(--c-glass-edge); transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast); }
+.map__chip:hover, .map__chip.is-active { background: var(--c-aqua); color: var(--c-brand-dark); border-color: var(--c-aqua); }
+.areas :focus-visible { outline-color: var(--c-aqua); }
+@media (max-width: 1024px) { .map { grid-template-columns: 1fr; } }
+@media (max-width: ${mq}) { .map { gap: var(--s-lg); margin-top: var(--s-lg); } .map__figs { gap: var(--s-lg); } .map__now { font-size: var(--t-md); min-height: 3em; } .map__label { font-size: 26px; } }
+
 /* ---------- Footer ---------- */
 .footer { background: var(--c-brand); color: var(--c-on-dark); padding-block: var(--s-xl) var(--s-lg); }
 .footer__row { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--s-lg); }
 .footer .logo { color: var(--c-on-dark); font-size: var(--t-xl); }
 .footer__addr { margin-top: var(--s-xs); color: var(--c-on-dark-soft); font-size: var(--t-sm); }
 .footer__phone { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xl); letter-spacing: -0.01em; }
-.footer__phone:hover { color: var(--c-call); }
+.footer__phone:hover { color: var(--c-aqua); }
 .footer__legal { margin-top: var(--s-xl); padding-top: var(--s-md); border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 11px; color: var(--c-on-dark-soft); }
 `;
 
@@ -869,7 +986,7 @@ function LeadForm() {
 
 function HeroSection() {
   return (
-    <section className="hero" id="top" aria-label="Cofulent Solutions, Fort Worth plumbing">
+    <section className="hero" id="top" aria-label="Confluent Solutions, Fort Worth plumbing">
       <WistiaBackground />
       <div className="hero__layout">
         <div className="hero__copy">
@@ -888,9 +1005,13 @@ function HeroSection() {
               </motion.span>
             ))}
           </h1>
-          <a className="hero__phone" href={T.business.phoneHref}>
-            {T.business.phoneDisplay}
-          </a>
+          <RotatingLine />
+          <div className="hero__actions">
+            <a className="hero__phone" href={T.business.phoneHref}>
+              {T.business.phoneDisplay}
+            </a>
+            <TextUsButton />
+          </div>
         </div>
         <div className="hero__side">
           <LeadForm />
@@ -960,11 +1081,11 @@ function ServiceCard({ index, title }: { index: number; title: string }) {
 
 function ServicesSection() {
   return (
-    <section className="section" id="services">
+    <section className="section mesh" id="services">
       <div className="wrap">
         <div className="services__head">
           <p className="eyebrow">Services</p>
-          <h2 className="h2">What we fix, find and replace.</h2>
+          <RevealHeading>What we fix, find and replace.</RevealHeading>
           <p className="services__lede">Residential plumbing and gas line work across the Fort Worth area.</p>
         </div>
         <ul className="services__grid">
@@ -999,7 +1120,9 @@ function StatsStrip() {
     <div className="stats">
       <div className="wrap stats__row">
         <div className="stat">
-          <span className="stat__n">24/7</span>
+          <span className="stat__n">
+            <CountUp to={24} />/7
+          </span>
           <span className="stat__l">Emergency response</span>
         </div>
         <div className="stat">
@@ -1029,10 +1152,10 @@ function TriageSection() {
   const item = TRIAGE[active] ?? TRIAGE[0];
   if (!item) return null;
   return (
-    <section className="section" id="triage">
+    <section className="section mesh" id="triage">
       <div className="wrap">
         <p className="eyebrow">Is it urgent?</p>
-        <h2 className="h2">Pick what you are seeing.</h2>
+        <RevealHeading>Pick what you are seeing.</RevealHeading>
         <div className="triage__grid">
           <ul className="triage__list">
             {TRIAGE.map((t, i) => (
@@ -1074,10 +1197,10 @@ function TriageSection() {
 function FaqSection() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <section className="section" id="faq">
+    <section className="section mesh" id="faq">
       <div className="wrap">
         <p className="eyebrow">FAQ</p>
-        <h2 className="h2">Straight answers.</h2>
+        <RevealHeading>Straight answers.</RevealHeading>
         <ul className="faq__list">
           {FAQS.map((f, i) => {
             const isOpen = open === i;
@@ -1121,7 +1244,7 @@ function WhySection() {
     <section className="section why" id="why">
       <div className="wrap why__head">
         <p className="eyebrow">Why choose us</p>
-        <h2 className="h2">Four reasons homeowners call us back.</h2>
+        <RevealHeading>Four reasons homeowners call us back.</RevealHeading>
       </div>
       <div className="why__stage">
         <div className="why__frame">
@@ -1187,10 +1310,10 @@ function JobsSection() {
   if (!first || !last) return null;
 
   return (
-    <section className="section" id="jobs">
+    <section className="section mesh" id="jobs">
       <div className="wrap">
         <p className="eyebrow">Job files</p>
-        <h2 className="h2">From disconnected to connected.</h2>
+        <RevealHeading>From disconnected to connected.</RevealHeading>
         <div className="jobs__stage">
           <div className="compare">
             {framesStatus === "missing" && <p className="photo-missing">Images not found in {T.frames.dir}</p>}
@@ -1357,39 +1480,6 @@ function TrustFacts() {
   );
 }
 
-/* ==========================================================================
-   SERVICE AREAS
-   ========================================================================== */
-function AreasSection() {
-  return (
-    <section className="section why" id="areas">
-      <div className="wrap">
-        <p className="eyebrow">Service areas</p>
-        <h2 className="h2">Serving Fort Worth and nearby.</h2>
-        <div className="marquee">
-          <div className="marquee__track">
-            <ul className="marquee__list">
-              {SERVICE_AREAS.map((city) => (
-                <li key={city}>{city}, TX</li>
-              ))}
-            </ul>
-            <ul className="marquee__list" aria-hidden="true">
-              {SERVICE_AREAS.map((city) => (
-                <li key={city}>{city}, TX</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        <div className="areas__cta">
-          <a className="call-btn" href={T.business.phoneHref}>
-            Call {T.business.phoneDisplay}
-          </a>
-          <p className="areas__addr">{T.business.address}</p>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ==========================================================================
    SOCIAL ICONS, BADGES
@@ -1418,7 +1508,7 @@ function BadgesSection() {
     <section className="section why" id="badges">
       <div className="wrap">
         <p className="eyebrow">Recognition and partners</p>
-        <h2 className="h2">Names homeowners already know.</h2>
+        <RevealHeading>Names homeowners already know.</RevealHeading>
         <ul className="badges__grid">
           {BADGES.map((badge) => (
             <li className={`badge card ${badge.width / badge.height > 2 ? "badge--wide" : ""}`} key={badge.name}>
@@ -1445,7 +1535,7 @@ function BadgesSection() {
 /* ==========================================================================
    EXIT INTENT: cursor leaves through the top of the viewport. One line, the number.
    ========================================================================== */
-const EXIT_STORAGE_KEY = "cofulent-exit-shown";
+const EXIT_STORAGE_KEY = "confluent-exit-shown";
 const EXIT_MIN_DWELL_MS = 4000;
 
 function ExitIntentPopup() {
@@ -1494,7 +1584,7 @@ function ExitIntentPopup() {
           className="exit"
           role="dialog"
           aria-modal="true"
-          aria-label="Call Cofulent Solutions"
+          aria-label="Call Confluent Solutions"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -1535,10 +1625,10 @@ function Footer() {
             <Logo onDark />
             <p className="footer__addr">{T.business.address}</p>
             <div className="footer__social">
-              <a href={T.business.facebook} target="_blank" rel="noopener noreferrer" aria-label="Cofulent Solutions on Facebook">
+              <a href={T.business.facebook} target="_blank" rel="noopener noreferrer" aria-label="Confluent Solutions on Facebook">
                 <FacebookIcon />
               </a>
-              <a href={T.business.google} target="_blank" rel="noopener noreferrer" aria-label="Cofulent Solutions on Google">
+              <a href={T.business.google} target="_blank" rel="noopener noreferrer" aria-label="Confluent Solutions on Google">
                 <GoogleIcon />
               </a>
             </div>
@@ -1550,6 +1640,56 @@ function Footer() {
         <p className="footer__legal">© {new Date().getFullYear()} {T.business.name}. All rights reserved.</p>
       </div>
     </footer>
+  );
+}
+
+function smsHref(): string {
+  return `sms:${T.business.smsNumber}?&body=${encodeURIComponent(T.business.smsBody)}`;
+}
+
+function ChatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.2 3.6a.6.6 0 0 1-1-.46V16H6.5A2.5 2.5 0 0 1 4 13.5v-8z" />
+      <circle cx="9" cy="9.5" r="1" />
+      <circle cx="12.5" cy="9.5" r="1" />
+      <circle cx="16" cy="9.5" r="1" />
+    </svg>
+  );
+}
+
+// Glass pill used next to the hero phone number (tablet and desktop).
+function TextUsButton() {
+  return (
+    <a className="text-btn glass" href={smsHref()}>
+      <span className="text-btn__icon">
+        <ChatIcon />
+      </span>
+      <span className="text-btn__label">
+        <strong>Text us</strong>
+        <small>Send a photo of the problem</small>
+      </span>
+    </a>
+  );
+}
+
+// Floating pill on phones, sitting just above the tap-to-call bar.
+function TextUsFab() {
+  return (
+    <motion.a
+      className="text-fab"
+      href={smsHref()}
+      aria-label={`Text ${T.business.name}`}
+      initial={{ opacity: 0, y: 24, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: 1.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      whileTap={{ scale: 0.96 }}
+    >
+      <span className="text-btn__icon">
+        <ChatIcon />
+      </span>
+      <span>Text us</span>
+    </motion.a>
   );
 }
 
@@ -1569,6 +1709,203 @@ function MagneticCall() {
     <motion.a className="call-btn" href={T.business.phoneHref} style={{ x, y }} onPointerMove={onMove} onPointerLeave={onLeave}>
       Call {T.business.phoneDisplay}
     </motion.a>
+  );
+}
+
+/* ==========================================================================
+   WATER DETAILS: animated headings, wave dividers, rotating line, level meter
+   ========================================================================== */
+const HEADING_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const HEADING_STAGGER_S = 0.07;
+const HEADING_DURATION_S = 0.7;
+
+function RevealHeading({ children }: { children: string }) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-12% 0px" });
+  const reduce = useReducedMotion();
+  const shown = inView || reduce === true;
+  return (
+    <h2 className="h2 reveal" ref={ref} aria-label={children}>
+      {children.split(" ").map((word, i) => (
+        <span className="reveal__mask" key={`${word}-${i}`} aria-hidden="true">
+          <motion.span
+            className="reveal__word"
+            initial={{ y: "115%" }}
+            animate={{ y: shown ? "0%" : "115%" }}
+            transition={{ delay: i * HEADING_STAGGER_S, duration: HEADING_DURATION_S, ease: HEADING_EASE }}
+          >
+            {word}
+          </motion.span>
+        </span>
+      ))}
+    </h2>
+  );
+}
+
+type WaveTone = "bg-deep" | "deep-bg" | "deep-navy" | "navy-bg" | "bg-brand";
+const WAVE_VIEW = { w: 2880, h: 56, mid: 28, amp: 26, period: 360 } as const;
+function buildWave(offsetY: number): string {
+  const { w, h, mid, amp, period } = WAVE_VIEW;
+  let d = `M0 ${mid + offsetY} Q ${period / 2} ${mid + offsetY - amp} ${period} ${mid + offsetY}`;
+  for (let x = period * 2; x <= w; x += period) d += ` T ${x} ${mid + offsetY}`;
+  return `${d} V${h} H0 Z`;
+}
+const WAVE_MAIN = buildWave(0);
+const WAVE_SHEEN = buildWave(-WAVE_VIEW.amp / 4);
+
+function WaveDivider({ tone }: { tone: WaveTone }) {
+  return (
+    <div className={`wave wave--${tone}`} aria-hidden="true">
+      <svg className="wave__svg wave__svg--slow" viewBox={`0 0 ${WAVE_VIEW.w} ${WAVE_VIEW.h}`} preserveAspectRatio="none">
+        <path className="wave__sheen" d={WAVE_SHEEN} />
+      </svg>
+      <svg className="wave__svg" viewBox={`0 0 ${WAVE_VIEW.w} ${WAVE_VIEW.h}`} preserveAspectRatio="none">
+        <path className="wave__fill" d={WAVE_MAIN} />
+      </svg>
+    </div>
+  );
+}
+
+function RotatingLine() {
+  const reduce = useReducedMotion();
+  const [index, setIndex] = useState<number>(0);
+  useEffect(() => {
+    if (reduce) return;
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % ROTATING_LINES.length), T.map.rotateMs);
+    return () => window.clearInterval(id);
+  }, [reduce]);
+  const line = ROTATING_LINES[index] ?? "";
+  return (
+    <p className="hero__rotor">
+      <span className="hero__rotor-label">We handle</span>
+      <span className="hero__rotor-slot" aria-live="off">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={line}
+            className="hero__rotor-word"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: "0%", opacity: 1 }}
+            exit={{ y: "-100%", opacity: 0 }}
+            transition={{ duration: 0.35, ease: HEADING_EASE }}
+          >
+            {line}
+          </motion.span>
+        </AnimatePresence>
+      </span>
+    </p>
+  );
+}
+
+function WaterMeter() {
+  const { scrollYProgress } = useScroll();
+  const level = useSpring(scrollYProgress, T.spring);
+  const scaleY = useTransform(level, [0, 1], [0.02, 1]);
+  return (
+    <div className="watermeter" aria-hidden="true">
+      <motion.div className="watermeter__fill" style={{ scaleY }} />
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SERVICE-AREA MAP (stylized, not to scale)
+   ========================================================================== */
+function projectArea(area: AreaGeo): { x: number; y: number } {
+  const { w, h, pad, lonMin, lonSpan, latMax, latSpan } = T.map;
+  return {
+    x: pad + ((area.lon - lonMin) / lonSpan) * (w - pad * 2),
+    y: pad + ((latMax - area.lat) / latSpan) * (h - pad * 2),
+  };
+}
+const MAP_POINTS = AREA_GEO.map((area) => ({ name: area.name, ...projectArea(area) }));
+const MAP_LABEL_FLIP_X = T.map.w * 0.7;
+const MAP_LABEL_LIFT = 16;
+const MAP_DOT_R = 6;
+const MAP_DOT_R_ACTIVE = 9;
+
+function AreaMap() {
+  const [active, setActive] = useState<string>(T.map.home);
+  const current = MAP_POINTS.find((p) => p.name === active);
+  const flip = current !== undefined && current.x > MAP_LABEL_FLIP_X;
+  return (
+    <div className="map">
+      <div className="map__panel">
+        <svg className="map__svg" viewBox={`0 0 ${T.map.w} ${T.map.h}`} role="img" aria-label="Stylized map of the cities Confluent Solutions serves around Fort Worth">
+          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+            <line key={`v${n}`} className="map__grid" x1={(T.map.w / 8) * n} y1={0} x2={(T.map.w / 8) * n} y2={T.map.h} />
+          ))}
+          {[1, 2, 3, 4, 5].map((n) => (
+            <line key={`h${n}`} className="map__grid" x1={0} y1={(T.map.h / 6) * n} x2={T.map.w} y2={(T.map.h / 6) * n} />
+          ))}
+          <path className="map__water" d="M92 192 C96 164 150 156 184 174 C214 190 196 222 152 224 C112 226 88 214 92 192 Z" />
+          <path className="map__river" d="M40 340 C150 312 240 252 310 272 S440 336 520 304 S690 384 770 452" />
+          {MAP_POINTS.map((p) => {
+            const isActive = p.name === active;
+            return (
+              <g key={p.name} className={isActive ? "map__node is-active" : "map__node"} aria-hidden="true" onPointerEnter={() => setActive(p.name)} onClick={() => setActive(p.name)}>
+                <circle cx={p.x} cy={p.y} r={T.map.pad / 2} fill="transparent" />
+                {isActive && <circle className="map__ring" cx={p.x} cy={p.y} r={MAP_DOT_R_ACTIVE} />}
+                {isActive && <circle className="map__ring map__ring--late" cx={p.x} cy={p.y} r={MAP_DOT_R_ACTIVE} />}
+                <circle className="map__dot" cx={p.x} cy={p.y} r={isActive ? MAP_DOT_R_ACTIVE : MAP_DOT_R} />
+              </g>
+            );
+          })}
+          {current && (
+            <text className="map__label" x={current.x} y={current.y - MAP_LABEL_LIFT} textAnchor={flip ? "end" : "middle"}>
+              {current.name}
+            </text>
+          )}
+          <text className="map__legend" x={T.map.pad / 2} y={T.map.h - T.map.pad / 3}>
+            STYLIZED MAP, NOT TO SCALE
+          </text>
+        </svg>
+      </div>
+      <div className="map__side">
+        <div className="map__figs">
+          <div>
+            <span className="map__n">
+              <CountUp to={SERVICE_AREAS.length} />
+            </span>
+            <span className="map__cap">Cities served</span>
+          </div>
+          <div>
+            <span className="map__n">
+              <CountUp to={24} />/7
+            </span>
+            <span className="map__cap">Emergency line</span>
+          </div>
+        </div>
+        <p className="map__now" aria-live="polite">
+          {active === T.map.home ? `Home base: ${T.business.address}.` : `We serve ${active}, TX. Call and we will get you on the schedule.`}
+        </p>
+        <ul className="map__chips">
+          {SERVICE_AREAS.map((city) => (
+            <li key={city}>
+              <button type="button" className={city === active ? "map__chip is-active" : "map__chip"} onPointerEnter={() => setActive(city)} onFocus={() => setActive(city)} onClick={() => setActive(city)}>
+                {city}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="areas__cta">
+          <a className="call-btn" href={T.business.phoneHref}>
+            Call {T.business.phoneDisplay}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AreasSection() {
+  return (
+    <section className="section areas" id="areas">
+      <div className="wrap">
+        <p className="eyebrow">Service areas</p>
+        <RevealHeading>Serving Fort Worth and nearby.</RevealHeading>
+        <AreaMap />
+      </div>
+    </section>
   );
 }
 
@@ -1603,25 +1940,34 @@ function MobileCallBar() {
    ========================================================================== */
 export default function App() {
   const [framesStatus, setFramesStatus] = useState<FramesStatus>("loading");
+  const reduceMotion = useReducedMotion();
   return (
     <FramesContext.Provider value={framesStatus}>
       <style>{CSS}</style>
       <Header />
-      <main>
+      <WaterMeter />
+      <motion.main initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, ease: HEADING_EASE }}>
         <HeroSection />
         <StatsStrip />
         <ServicesSection />
         <VideoScrollEngine onStatus={setFramesStatus}>{({ progress, stage }) => <ProcessSection progress={progress} stage={stage} />}</VideoScrollEngine>
         <TrustFacts />
         <TriageSection />
+        <WaveDivider tone="bg-deep" />
         <WhySection />
+        <WaveDivider tone="deep-bg" />
         <JobsSection />
+        <WaveDivider tone="bg-deep" />
         <BadgesSection />
-        <FaqSection />
+        <WaveDivider tone="deep-navy" />
         <AreasSection />
-      </main>
+        <WaveDivider tone="navy-bg" />
+        <FaqSection />
+        <WaveDivider tone="bg-brand" />
+      </motion.main>
       <Footer />
       <MobileCallBar />
+      <TextUsFab />
       <ExitIntentPopup />
     </FramesContext.Provider>
   );
