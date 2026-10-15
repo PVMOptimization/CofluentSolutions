@@ -87,16 +87,16 @@ const T = {
   layout: { max: "1200px", maxWide: "1360px", gutter: "clamp(1rem, 4vw, 3rem)", header: "68px", callBar: "60px", protrude: "clamp(28px, calc((100vw - 1230px) / 2), 88px)", wave: "clamp(32px, 5vw, 64px)", meterMin: 1280 },
   map: { w: 800, h: 520, pad: 50, lonMin: -97.5, lonSpan: 0.45, latMax: 32.97, latSpan: 0.42, home: "Fort Worth", rotateMs: 2600 },
   motion: { ease: "cubic-bezier(0.22, 1, 0.36, 1)", fast: "180ms", base: "320ms" },
-  scroll: { runDesktop: "260vh", runMobile: "220vh", revealStart: 0.12, revealStep: 0.2, revealSpan: 0.12 },
+  scroll: { runDesktop: "170vh", runMobile: "160vh", revealStart: 0.08, revealStep: 0.18, revealSpan: 0.1 },
   spring: { stiffness: 230, damping: 32, mass: 0.3, restDelta: 0.0005 },
   focal: { x: 0.5, y: 0.5 },
   frames: { count: 120, dir: "/Plumberanimated", prefix: "ezgif-frame-", ext: ".jpg", pad: 3 },
   business: {
-    name: "Confluent Solutions",
+    name: "Cofulent Solutions",
     phoneDisplay: "817-999-7363",
     phoneHref: "tel:+18179997363",
     smsNumber: "+18179997363",
-    smsBody: "Hi Confulent Solutions, I need help with: ",
+    smsBody: "Hi Cofulent Solutions, I need help with: ",
     address: "1319 Madeline Pl, Fort Worth, Texas 76107",
     leadEndpoint: "/api/lead",
     logoCandidates: ["/logo.png", "/Logo.png", "/logo.PNG", "/logo.webp", "/logo.svg", "/logo.jpg"] as readonly string[], // first one that exists is used; save yours in public/
@@ -986,7 +986,7 @@ function LeadForm() {
 
 function HeroSection() {
   return (
-    <section className="hero" id="top" aria-label="Confluent Solutions, Fort Worth plumbing">
+    <section className="hero" id="top" aria-label="Cofulent Solutions, Fort Worth plumbing">
       <WistiaBackground />
       <div className="hero__layout">
         <div className="hero__copy">
@@ -1535,7 +1535,7 @@ function BadgesSection() {
 /* ==========================================================================
    EXIT INTENT: cursor leaves through the top of the viewport. One line, the number.
    ========================================================================== */
-const EXIT_STORAGE_KEY = "confluent-exit-shown";
+const EXIT_STORAGE_KEY = "cofulent-exit-shown";
 const EXIT_MIN_DWELL_MS = 4000;
 
 function ExitIntentPopup() {
@@ -1584,7 +1584,7 @@ function ExitIntentPopup() {
           className="exit"
           role="dialog"
           aria-modal="true"
-          aria-label="Call Confluent Solutions"
+          aria-label="Call Cofulent Solutions"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -1625,10 +1625,10 @@ function Footer() {
             <Logo onDark />
             <p className="footer__addr">{T.business.address}</p>
             <div className="footer__social">
-              <a href={T.business.facebook} target="_blank" rel="noopener noreferrer" aria-label="Confluent Solutions on Facebook">
+              <a href={T.business.facebook} target="_blank" rel="noopener noreferrer" aria-label="Cofulent Solutions on Facebook">
                 <FacebookIcon />
               </a>
-              <a href={T.business.google} target="_blank" rel="noopener noreferrer" aria-label="Confluent Solutions on Google">
+              <a href={T.business.google} target="_blank" rel="noopener noreferrer" aria-label="Cofulent Solutions on Google">
                 <GoogleIcon />
               </a>
             </div>
@@ -1830,7 +1830,7 @@ function AreaMap() {
   return (
     <div className="map">
       <div className="map__panel">
-        <svg className="map__svg" viewBox={`0 0 ${T.map.w} ${T.map.h}`} role="img" aria-label="Stylized map of the cities Confluent Solutions serves around Fort Worth">
+        <svg className="map__svg" viewBox={`0 0 ${T.map.w} ${T.map.h}`} role="img" aria-label="Stylized map of the cities Cofulent Solutions serves around Fort Worth">
           {[1, 2, 3, 4, 5, 6, 7].map((n) => (
             <line key={`v${n}`} className="map__grid" x1={(T.map.w / 8) * n} y1={0} x2={(T.map.w / 8) * n} y2={T.map.h} />
           ))}
