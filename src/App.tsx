@@ -84,7 +84,7 @@ const T = {
   },
   sizeMobile: { xs: "0.6875rem", sm: "0.8125rem", md: "0.9375rem", lg: "1.0625rem", xl: "1.5rem", xxl: "2rem", mega: "2.375rem" },
   bp: { mobile: 768, wide: 1280 },
-  layout: { max: "1200px", maxWide: "1360px", gutter: "clamp(1rem, 4vw, 3rem)", header: "68px", callBar: "60px", protrude: "clamp(28px, calc((100vw - 1230px) / 2), 88px)", wave: "clamp(32px, 5vw, 64px)", meterMin: 1280 },
+  layout: { max: "1200px", maxWide: "1360px", gutter: "clamp(1rem, 4vw, 3rem)", header: "88px", callBar: "60px", protrude: "clamp(28px, calc((100vw - 1230px) / 2), 88px)", wave: "clamp(32px, 5vw, 64px)", meterMin: 1280 },
   map: { w: 800, h: 520, pad: 50, lonMin: -97.5, lonSpan: 0.45, latMax: 32.97, latSpan: 0.42, home: "Fort Worth", rotateMs: 2600 },
   motion: { ease: "cubic-bezier(0.22, 1, 0.36, 1)", fast: "180ms", base: "320ms" },
   scroll: { runDesktop: "170vh", runMobile: "160vh", revealStart: 0.08, revealStep: 0.18, revealSpan: 0.1 },
@@ -339,7 +339,7 @@ img { display: block; max-width: 100%; }
 .header__row { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--s-lg); }
 .logo { display: inline-flex; align-items: center; gap: var(--s-xs); color: var(--c-brand); font-family: var(--f-display); font-weight: 700; font-size: var(--t-lg); letter-spacing: -0.01em; }
 .logo svg { width: 1.5em; height: 1.5em; flex: none; }
-.logo__img { height: 40px; width: auto; max-width: 220px; object-fit: contain; }
+.logo__img { height: 100px; width: auto; max-width: 220px; object-fit: contain; }
 .logo__img--light { filter: brightness(0) invert(1); height: 52px; }
 @media (max-width: ${mq}) { .logo__img { height: 34px; } }
 .nav { display: flex; gap: var(--s-lg); font-size: var(--t-sm); font-weight: 500; color: var(--c-ink-soft); }
@@ -748,7 +748,7 @@ function Logo({ onDark = false }: { onDark?: boolean }) {
           className={`logo__img ${onDark ? "logo__img--light" : ""}`}
           src={src}
           alt={T.business.name}
-          height={44}
+          height={64}
           onError={() => setCandidate((n) => n + 1)}
         />
       )}
