@@ -92,11 +92,11 @@ const T = {
   focal: { x: 0.5, y: 0.5 },
   frames: { count: 120, dir: "/Plumberanimated", prefix: "ezgif-frame-", ext: ".jpg", pad: 3 },
   business: {
-    name: "Confluent Solutions",
+    name: "Cofulent Solutions",
     phoneDisplay: "817-999-7363",
     phoneHref: "tel:+18179997363",
     smsNumber: "+18179997363",
-    smsBody: "Hi Confluent Solutions, I need help with: ",
+    smsBody: "Hi Cofulent Solutions, I need help with: ",
     address: "1319 Madeline Pl, Fort Worth, Texas 76107",
     leadEndpoint: "/api/lead",
     logoCandidates: ["/logo.png", "/Logo.png", "/logo.PNG", "/logo.webp", "/logo.svg", "/logo.jpg"] as readonly string[], // first one that exists is used; save yours in public/
@@ -1002,16 +1002,20 @@ interface Question {
   options?: readonly string[];
 }
 
+// Matches the services Confluent wants booked (from their onboarding form).
 const FORM_SERVICES: readonly string[] = [
-  "Gas line or gas leak",
-  "Water or sewer line",
+  "Water line replacement",
+  "Gas line replacement",
+  "Yard line replacement",
   "Whole-house repipe",
-  "Slab leak",
-  "Drain or sewer backup",
-  "Water heater",
-  "Leak detection",
-  "Other plumbing repair",
+  "Tunneling under the slab",
+  "Tankless water heater conversion",
+  "Something else",
 ];
+
+// Confluent counts a lead as qualified only if the job is within 2 weeks.
+// The first two options are qualified; keep this in sync with QUALIFIED_TIMELINES in functions/api/lead.ts.
+const TIMELINE_OPTIONS: readonly string[] = ["As soon as possible", "Within 2 weeks", "2 to 4 weeks", "1 to 3 months", "Just comparing prices"];
 
 const FIRST_QUESTION: Question = { kind: "name", title: "First things first. What's your name?", hint: "Takes about 60 seconds." };
 
@@ -1019,13 +1023,13 @@ const QUESTIONS: readonly Question[] = [
   FIRST_QUESTION,
   { kind: "phone", title: "What's the best number to reach you?", hint: "We call back fast. No spam, ever." },
   { kind: "email", title: "And your email?", hint: "Optional. For your estimate and appointment details." },
-  { kind: "choice", field: "service", title: "What do you need help with?", hint: "Pick the closest match.", options: FORM_SERVICES },
+  { kind: "choice", field: "service", title: "What do you need help with?", hint: "Pick the closest match. Financing available.", options: FORM_SERVICES },
   {
     kind: "choice",
     field: "urgency",
-    title: "How soon do you need us?",
+    title: "When do you want the work done?",
     hint: "Smell gas? Get everyone outside first, then call us.",
-    options: ["Emergency: right now", "Today", "This week", "Just getting a quote"],
+    options: TIMELINE_OPTIONS,
   },
   {
     kind: "choice",
@@ -1313,7 +1317,7 @@ function LeadForm() {
 
 function HeroSection() {
   return (
-    <section className="hero" id="top" aria-label="Confluent Solutions, Fort Worth plumbing">
+    <section className="hero" id="top" aria-label="Cofulent Solutions, Fort Worth plumbing">
       <WistiaBackground />
       <div className="hero__layout">
         <div className="hero__copy">
@@ -1876,7 +1880,7 @@ function BadgesSection() {
 /* ==========================================================================
    EXIT INTENT: cursor leaves through the top of the viewport. One line, the number.
    ========================================================================== */
-const EXIT_STORAGE_KEY = "confluent-exit-shown";
+const EXIT_STORAGE_KEY = "cofulent-exit-shown";
 const EXIT_MIN_DWELL_MS = 4000;
 
 function ExitIntentPopup() {
@@ -1925,7 +1929,7 @@ function ExitIntentPopup() {
           className="exit"
           role="dialog"
           aria-modal="true"
-          aria-label="Call Confluent Solutions"
+          aria-label="Call Cofulent Solutions"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -1966,10 +1970,10 @@ function Footer() {
             <Logo onDark />
             <p className="footer__addr">{T.business.address}</p>
             <div className="footer__social">
-              <a href={T.business.facebook} target="_blank" rel="noopener noreferrer" aria-label="Confluent Solutions on Facebook">
+              <a href={T.business.facebook} target="_blank" rel="noopener noreferrer" aria-label="Cofulent Solutions on Facebook">
                 <FacebookIcon />
               </a>
-              <a href={T.business.google} target="_blank" rel="noopener noreferrer" aria-label="Confluent Solutions on Google">
+              <a href={T.business.google} target="_blank" rel="noopener noreferrer" aria-label="Cofulent Solutions on Google">
                 <GoogleIcon />
               </a>
             </div>
@@ -2171,7 +2175,7 @@ function AreaMap() {
   return (
     <div className="map">
       <div className="map__panel">
-        <svg className="map__svg" viewBox={`0 0 ${T.map.w} ${T.map.h}`} role="img" aria-label="Stylized map of the cities Confluent Solutions serves around Fort Worth">
+        <svg className="map__svg" viewBox={`0 0 ${T.map.w} ${T.map.h}`} role="img" aria-label="Stylized map of the cities Cofulent Solutions serves around Fort Worth">
           {[1, 2, 3, 4, 5, 6, 7].map((n) => (
             <line key={`v${n}`} className="map__grid" x1={(T.map.w / 8) * n} y1={0} x2={(T.map.w / 8) * n} y2={T.map.h} />
           ))}
