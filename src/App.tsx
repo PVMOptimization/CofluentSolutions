@@ -1013,8 +1013,10 @@ const FORM_SERVICES: readonly string[] = [
   "Other plumbing repair",
 ];
 
+const FIRST_QUESTION: Question = { kind: "name", title: "First things first. What's your name?", hint: "Takes about 60 seconds." };
+
 const QUESTIONS: readonly Question[] = [
-  { kind: "name", title: "First things first. What's your name?", hint: "Takes about 60 seconds." },
+  FIRST_QUESTION,
   { kind: "phone", title: "What's the best number to reach you?", hint: "We call back fast. No spam, ever." },
   { kind: "email", title: "And your email?", hint: "Optional. For your estimate and appointment details." },
   { kind: "choice", field: "service", title: "What do you need help with?", hint: "Pick the closest match.", options: FORM_SERVICES },
@@ -1097,7 +1099,7 @@ function LeadForm() {
   const reduceMotion = useReducedMotion();
 
   const total = QUESTIONS.length;
-  const question = QUESTIONS[step] ?? QUESTIONS[0];
+  const question: Question = QUESTIONS[step] ?? FIRST_QUESTION;
   const pct = status === "sent" ? 100 : Math.floor(((step + 1) / total) * 100);
   const isLast = step === total - 1;
 
