@@ -101,12 +101,13 @@ const T = {
     leadEndpoint: "/api/lead",
     logoCandidates: ["/logo.png", "/Logo.png", "/logo.PNG", "/logo.webp", "/logo.svg", "/logo.jpg"] as readonly string[], // first one that exists is used; save yours in public/
     wistia: { mediaId: "19s5ibgs65", playerSrc: "https://fast.wistia.com/player.js", embedSrc: "https://fast.wistia.com/embed/19s5ibgs65.js" },
-    chatWidget: {
-      loaderSrc: "https://widgets.leadconnectorhq.com/loader.js",
-      resourcesUrl: "https://widgets.leadconnectorhq.com/chat-widget/loader.js",
-      widgetId: "6adabc874d08c05d78cb79d1",
-      source: "WEB_USER",
-    },
+    legalName: "Confluent Solutions", // name used on the legal pages and SMS consent; must match the EIN / A2P registration
+    email: "consols@outlook.com",
+    // Static pages in public/. The GoHighLevel chat widget is embedded ONLY on /contact,
+    // because carrier rules say no phone-collecting form may share a page with the widget.
+    privacyHref: "/privacy-policy",
+    termsHref: "/terms",
+    contactHref: "/contact",
     facebook: "https://facebook.com/ConfluentSolutionsTX/",
     google: "https://www.google.com/maps/place/Confluent+Solutions/@32.7462208,-97.3747285,2107m/data=!3m1!1e3!4m6!3m5!1s0x864e7374d014c9e3:0xd453b45bc08216e6!8m2!3d32.7462431!4d-97.3744597!16s%2Fg%2F11jp9n7nrs!5m1!1e2?entry=ttu",
   },
@@ -461,6 +462,9 @@ img { display: block; max-width: 100%; }
 .field textarea::placeholder { color: rgba(244, 248, 255, 0.5); }
 .field textarea:focus { outline: none; border-color: #fff; background: rgba(8, 17, 44, 0.45); }
 .field--zip { max-width: 9rem; }
+.consent { display: grid; grid-template-columns: auto 1fr; gap: var(--s-xs); align-items: start; font-size: 11px; line-height: 1.45; color: var(--c-on-dark-soft); cursor: pointer; }
+.consent input { width: 16px; height: 16px; margin-top: 1px; accent-color: var(--c-aqua); }
+.consent a { color: var(--c-on-dark); text-decoration: underline; text-underline-offset: 2px; }
 .choices { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-xs); }
 .choice {
   min-height: 46px; padding: 0.55rem var(--s-sm); border-radius: var(--r-md); border: 1px solid var(--c-glass-edge); background: rgba(8, 17, 44, 0.28);
@@ -772,7 +776,11 @@ img { display: block; max-width: 100%; }
 .footer__addr { margin-top: var(--s-xs); color: var(--c-on-dark-soft); font-size: var(--t-sm); }
 .footer__phone { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xl); letter-spacing: -0.01em; }
 .footer__phone:hover { color: var(--c-aqua); }
-.footer__legal { margin-top: var(--s-xl); padding-top: var(--s-md); border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 11px; color: var(--c-on-dark-soft); }
+.footer__addr a { color: var(--c-on-dark); text-decoration: underline; text-underline-offset: 3px; }
+.footer__links { display: flex; flex-wrap: wrap; gap: var(--s-xs) var(--s-lg); margin-top: var(--s-lg); font-size: var(--t-sm); }
+.footer__links a { color: var(--c-on-dark-soft); text-decoration: underline; text-underline-offset: 3px; }
+.footer__links a:hover { color: var(--c-on-dark); }
+.footer__legal { margin-top: var(--s-md); padding-top: var(--s-md); border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 11px; color: var(--c-on-dark-soft); }
 `;
 
 /* ==========================================================================
@@ -976,6 +984,7 @@ interface LeadAnswers {
   address: string;
   zip: string;
   details: string;
+  smsConsent: boolean;
 }
 
 const EMPTY_ANSWERS: LeadAnswers = {
@@ -989,6 +998,7 @@ const EMPTY_ANSWERS: LeadAnswers = {
   address: "",
   zip: "",
   details: "",
+  smsConsent: false,
 };
 
 type ChoiceField = "service" | "urgency" | "ownership";
@@ -1043,6 +1053,12 @@ const QUESTIONS: readonly Question[] = [
 ];
 
 const PHONE_STEP = QUESTIONS.findIndex((q) => q.kind === "phone");
+
+// Optional, unchecked by default (carriers do not allow consent to be required or pre-checked).
+// The exact wording is sent with the lead so there is a record of what the person agreed to.
+const SMS_CONSENT_TEXT =
+  `I agree to receive text messages from ${T.business.legalName} about my service request, including appointment scheduling, reminders and follow-ups. ` +
+  "Consent is not a condition of purchase. Message frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.";
 
 const digitsOnly = (value: string): string => value.replace(/\D/g, "");
 const isValidPhone = (value: string): boolean => {
@@ -1135,6 +1151,8 @@ function LeadForm() {
       address: a.address.trim(),
       zip: a.zip.trim(),
       details: a.details.trim(),
+      smsConsent: a.smsConsent,
+      smsConsentText: a.smsConsent ? SMS_CONSENT_TEXT : "",
       page: typeof window !== "undefined" ? window.location.href : "",
     };
     try {
@@ -1250,6 +1268,16 @@ function LeadForm() {
             <div className="field">
               <input aria-label="Phone number" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="817-000-0000" maxLength={20} value={answers.phone} onChange={(e) => set("phone", formatPhone(e.target.value))} />
             </div>
+          )}
+
+          {question.kind === "phone" && (
+            <label className="consent">
+              <input type="checkbox" name="smsConsent" checked={answers.smsConsent} onChange={(e) => set("smsConsent", e.target.checked)} />
+              <span>
+                {SMS_CONSENT_TEXT} See our <a href={T.business.privacyHref} target="_blank" rel="noopener">Privacy Policy</a> and{" "}
+                <a href={T.business.termsHref} target="_blank" rel="noopener">Terms</a>.
+              </span>
+            </label>
           )}
 
           {question.kind === "email" && (
@@ -1683,20 +1711,6 @@ function addScriptOnce(src: string, isModule: boolean): void {
   document.head.appendChild(el);
 }
 
-/* ==========================================================================
-   GOHIGHLEVEL (LEADCONNECTOR) CHAT WIDGET
-   ========================================================================== */
-function addChatWidget(): void {
-  const { loaderSrc, resourcesUrl, widgetId, source } = T.business.chatWidget;
-  if (document.querySelector(`script[data-widget-id="${widgetId}"]`)) return;
-  const el = document.createElement("script");
-  el.src = loaderSrc;
-  el.setAttribute("data-resources-url", resourcesUrl);
-  el.setAttribute("data-widget-id", widgetId);
-  el.setAttribute("data-source", source);
-  document.body.appendChild(el);
-}
-
 function WistiaBackground() {
   const bgRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<WistiaPlayerElement>(null);
@@ -1969,6 +1983,9 @@ function Footer() {
           <div>
             <Logo onDark />
             <p className="footer__addr">{T.business.address}</p>
+            <p className="footer__addr">
+              <a href={`mailto:${T.business.email}`}>{T.business.email}</a>
+            </p>
             <div className="footer__social">
               <a href={T.business.facebook} target="_blank" rel="noopener noreferrer" aria-label="Cofulent Solutions on Facebook">
                 <FacebookIcon />
@@ -1982,6 +1999,11 @@ function Footer() {
             {T.business.phoneDisplay}
           </a>
         </div>
+        <nav className="footer__links" aria-label="Legal">
+          <a href={T.business.contactHref}>Contact</a>
+          <a href={T.business.privacyHref}>Privacy Policy</a>
+          <a href={T.business.termsHref}>Terms of Service</a>
+        </nav>
         <p className="footer__legal">© {new Date().getFullYear()} {T.business.name}. All rights reserved.</p>
       </div>
     </footer>
@@ -2286,9 +2308,6 @@ function MobileCallBar() {
 export default function App() {
   const [framesStatus, setFramesStatus] = useState<FramesStatus>("loading");
   const reduceMotion = useReducedMotion();
-  useEffect(() => {
-    addChatWidget();
-  }, []);
   return (
     <FramesContext.Provider value={framesStatus}>
       <style>{CSS}</style>
