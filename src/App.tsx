@@ -101,6 +101,13 @@ const T = {
     leadEndpoint: "/api/lead",
     logoCandidates: ["/logo.png", "/Logo.png", "/logo.PNG", "/logo.webp", "/logo.svg", "/logo.jpg"] as readonly string[], // first one that exists is used; save yours in public/
     wistia: { mediaId: "19s5ibgs65", playerSrc: "https://fast.wistia.com/player.js", embedSrc: "https://fast.wistia.com/embed/19s5ibgs65.js" },
+    legalName: "Confluent Solutions", // name used on the legal pages and SMS consent; must match the EIN / A2P registration
+    email: "consols@outlook.com",
+    // Static pages in public/. The GoHighLevel chat widget is embedded ONLY on /contact,
+    // because carrier rules say no phone-collecting form may share a page with the widget.
+    privacyHref: "/privacy-policy",
+    termsHref: "/terms",
+    contactHref: "/contact",
     facebook: "https://facebook.com/ConfluentSolutionsTX/",
     google: "https://www.google.com/maps/place/Confluent+Solutions/@32.7462208,-97.3747285,2107m/data=!3m1!1e3!4m6!3m5!1s0x864e7374d014c9e3:0xd453b45bc08216e6!8m2!3d32.7462431!4d-97.3744597!16s%2Fg%2F11jp9n7nrs!5m1!1e2?entry=ttu",
   },
@@ -319,7 +326,7 @@ body {
 }
 @media (max-width: ${mq}) { body { padding-bottom: calc(var(--callbar-h) + env(safe-area-inset-bottom)); } }
 a { color: inherit; text-decoration: none; }
-button, input, select { font: inherit; color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
 img { display: block; max-width: 100%; }
 :focus-visible { outline: 3px solid var(--c-aqua-deep); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; } }
@@ -438,6 +445,47 @@ img { display: block; max-width: 100%; }
 .form__note a { color: var(--c-on-dark); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .form__status { font-size: var(--t-sm); font-weight: 700; }
 
+/* Step form: one question at a time */
+.form--steps { gap: var(--s-sm); min-width: 0; }
+.form__top { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--t-xs); color: var(--c-on-dark-soft); }
+.form__pct { color: var(--c-aqua); font-weight: 700; font-variant-numeric: tabular-nums; }
+.form__track { height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.16); overflow: hidden; }
+.form__bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--c-aqua-deep), var(--c-aqua)); transition: width var(--dur-base) var(--ease); }
+.form__step { display: grid; gap: var(--s-sm); padding-top: var(--s-xs); }
+.form__count { font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c-aqua); }
+.form__q { font-family: var(--f-display); font-weight: 700; font-size: clamp(1.25rem, 1.9vw, 1.6rem); line-height: 1.12; letter-spacing: -0.01em; color: var(--c-on-dark); }
+.form__hint { font-size: var(--t-sm); color: var(--c-on-dark-soft); margin-top: -0.35rem; }
+.field textarea {
+  width: 100%; min-height: 96px; padding: var(--s-sm) var(--s-md); border-radius: var(--r-md); border: 1px solid var(--c-glass-edge); resize: vertical;
+  background: rgba(8, 17, 44, 0.28); color: var(--c-on-dark); font-size: var(--t-md); line-height: 1.4; transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+.field textarea::placeholder { color: rgba(244, 248, 255, 0.5); }
+.field textarea:focus { outline: none; border-color: #fff; background: rgba(8, 17, 44, 0.45); }
+.field--zip { max-width: 9rem; }
+.consent { display: grid; grid-template-columns: auto 1fr; gap: var(--s-xs); align-items: start; font-size: 11px; line-height: 1.45; color: var(--c-on-dark-soft); cursor: pointer; }
+.consent input { width: 16px; height: 16px; margin-top: 1px; accent-color: var(--c-aqua); }
+.consent a { color: var(--c-on-dark); text-decoration: underline; text-underline-offset: 2px; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-xs); }
+.choice {
+  min-height: 46px; padding: 0.55rem var(--s-sm); border-radius: var(--r-md); border: 1px solid var(--c-glass-edge); background: rgba(8, 17, 44, 0.28);
+  color: var(--c-on-dark); font-size: var(--t-sm); font-weight: 700; line-height: 1.2; text-align: left; cursor: pointer;
+  transition: border-color var(--dur-fast), background var(--dur-fast), transform var(--dur-fast) var(--ease);
+}
+.choice:hover { border-color: rgba(255, 255, 255, 0.7); }
+.choice:active { transform: scale(0.98); }
+.choice[aria-pressed="true"] { border-color: var(--c-aqua); background: rgba(142, 197, 245, 0.2); }
+.form__err { font-size: var(--t-sm); font-weight: 700; color: #FFD0B5; }
+.form__nav { display: flex; align-items: center; justify-content: space-between; gap: var(--s-sm); padding-top: var(--s-xs); }
+.form__back { border: 0; background: none; padding: 0.5rem 0; cursor: pointer; color: var(--c-on-dark-soft); font-size: var(--t-sm); font-weight: 700; }
+.form__back:hover { color: var(--c-on-dark); }
+.form__back[hidden] { display: block; visibility: hidden; }
+.form__go { display: flex; align-items: center; gap: var(--s-sm); margin-left: auto; }
+.form__enter { font-size: var(--t-xs); color: var(--c-on-dark-soft); white-space: nowrap; }
+.form__go .submit { padding: 0 var(--s-lg); display: inline-flex; align-items: center; gap: 0.5rem; }
+.form__done { display: grid; gap: var(--s-sm); padding-block: var(--s-sm); }
+.form__done .form__q { font-size: var(--t-xl); }
+@media (hover: none) { .form__enter { display: none; } }
+
 .meter { position: absolute; inset: auto var(--gutter) var(--s-lg) var(--gutter); max-width: var(--max); margin-inline: auto; display: grid; gap: var(--s-xs); color: var(--c-on-dark); pointer-events: none; }
 .meter__row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-md); font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
 .meter__stage { font-variant-numeric: tabular-nums; }
@@ -454,6 +502,9 @@ img { display: block; max-width: 100%; }
   .form { padding: var(--s-md); gap: var(--s-sm); }
   .form__sub, .form__note, .field label { display: none; }
   .field input, .field select { min-height: 44px; }
+  .form__hint { font-size: var(--t-xs); }
+  .choice { min-height: 42px; padding: 0.45rem var(--s-xs); }
+  .field textarea { min-height: 72px; }
   .meter { inset: auto var(--gutter) calc(var(--callbar-h) + var(--s-sm) + env(safe-area-inset-bottom)) var(--gutter); }
   .meter__hint { display: none; }
 }
@@ -725,7 +776,11 @@ img { display: block; max-width: 100%; }
 .footer__addr { margin-top: var(--s-xs); color: var(--c-on-dark-soft); font-size: var(--t-sm); }
 .footer__phone { font-family: var(--f-display); font-weight: 700; font-size: var(--t-xl); letter-spacing: -0.01em; }
 .footer__phone:hover { color: var(--c-aqua); }
-.footer__legal { margin-top: var(--s-xl); padding-top: var(--s-md); border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 11px; color: var(--c-on-dark-soft); }
+.footer__addr a { color: var(--c-on-dark); text-decoration: underline; text-underline-offset: 3px; }
+.footer__links { display: flex; flex-wrap: wrap; gap: var(--s-xs) var(--s-lg); margin-top: var(--s-lg); font-size: var(--t-sm); }
+.footer__links a { color: var(--c-on-dark-soft); text-decoration: underline; text-underline-offset: 3px; }
+.footer__links a:hover { color: var(--c-on-dark); }
+.footer__legal { margin-top: var(--s-md); padding-top: var(--s-md); border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 11px; color: var(--c-on-dark-soft); }
 `;
 
 /* ==========================================================================
@@ -912,71 +967,375 @@ function StageReadout({ stage }: { stage: MotionValue<number> }) {
   );
 }
 
+/* ==========================================================================
+   LEAD FORM: 8 questions, one at a time. Phone is asked second, and every
+   step after it is saved to the lead endpoint, so drop-offs are still callable.
+   ========================================================================== */
 type FormStatus = "idle" | "sending" | "sent" | "error";
 
-function LeadForm() {
-  const [status, setStatus] = useState<FormStatus>("idle");
+interface LeadAnswers {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  service: string;
+  urgency: string;
+  ownership: string;
+  address: string;
+  zip: string;
+  details: string;
+  smsConsent: boolean;
+}
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const data = new FormData(form);
+const EMPTY_ANSWERS: LeadAnswers = {
+  firstName: "",
+  lastName: "",
+  phone: "",
+  email: "",
+  service: "",
+  urgency: "",
+  ownership: "",
+  address: "",
+  zip: "",
+  details: "",
+  smsConsent: false,
+};
+
+type ChoiceField = "service" | "urgency" | "ownership";
+type QuestionKind = "name" | "phone" | "email" | "choice" | "address" | "details";
+
+interface Question {
+  kind: QuestionKind;
+  title: string;
+  hint: string;
+  field?: ChoiceField;
+  options?: readonly string[];
+}
+
+// Matches the services Confluent wants booked (from their onboarding form).
+const FORM_SERVICES: readonly string[] = [
+  "Water line replacement",
+  "Gas line replacement",
+  "Yard line replacement",
+  "Whole-house repipe",
+  "Tunneling under the slab",
+  "Tankless water heater conversion",
+  "Something else",
+];
+
+// Confluent counts a lead as qualified only if the job is within 2 weeks.
+// The first two options are qualified; keep this in sync with QUALIFIED_TIMELINES in functions/api/lead.ts.
+const TIMELINE_OPTIONS: readonly string[] = ["As soon as possible", "Within 2 weeks", "2 to 4 weeks", "1 to 3 months", "Just comparing prices"];
+
+const FIRST_QUESTION: Question = { kind: "name", title: "First things first. What's your name?", hint: "Takes about 60 seconds." };
+
+const QUESTIONS: readonly Question[] = [
+  FIRST_QUESTION,
+  { kind: "phone", title: "What's the best number to reach you?", hint: "We call back fast. No spam, ever." },
+  { kind: "email", title: "And your email?", hint: "Optional. For your estimate and appointment details." },
+  { kind: "choice", field: "service", title: "What do you need help with?", hint: "Pick the closest match. Financing available.", options: FORM_SERVICES },
+  {
+    kind: "choice",
+    field: "urgency",
+    title: "When do you want the work done?",
+    hint: "Smell gas? Get everyone outside first, then call us.",
+    options: TIMELINE_OPTIONS,
+  },
+  {
+    kind: "choice",
+    field: "ownership",
+    title: "Do you own the property?",
+    hint: "Helps us know who signs off on the work.",
+    options: ["I own it", "I rent", "Landlord or property manager", "Commercial property"],
+  },
+  { kind: "address", title: "Where's the job?", hint: "Street address and ZIP code." },
+  { kind: "details", title: "Anything we should know before we call?", hint: "Optional. What you're seeing and how long it's been going on." },
+];
+
+const PHONE_STEP = QUESTIONS.findIndex((q) => q.kind === "phone");
+
+// Optional, unchecked by default (carriers do not allow consent to be required or pre-checked).
+// The exact wording is sent with the lead so there is a record of what the person agreed to.
+const SMS_CONSENT_TEXT =
+  `I agree to receive text messages from ${T.business.legalName} about my service request, including appointment scheduling, reminders and follow-ups. ` +
+  "Consent is not a condition of purchase. Message frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.";
+
+const digitsOnly = (value: string): string => value.replace(/\D/g, "");
+const isValidPhone = (value: string): boolean => {
+  const d = digitsOnly(value);
+  return d.length === 10 || (d.length === 11 && d.startsWith("1"));
+};
+const isValidEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
+
+function formatPhone(value: string): string {
+  let d = digitsOnly(value);
+  if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
+  d = d.slice(0, 10);
+  if (d.length < 4) return d;
+  if (d.length < 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+}
+
+function newLeadId(): string {
+  try {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  } catch {
+    /* fall through */
+  }
+  return `lead-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function validateStep(question: Question, a: LeadAnswers): string | null {
+  switch (question.kind) {
+    case "name":
+      return a.firstName.trim() ? null : "Please enter your first name.";
+    case "phone":
+      return isValidPhone(a.phone) ? null : "Please enter a 10-digit phone number.";
+    case "email":
+      return !a.email.trim() || isValidEmail(a.email) ? null : "That email doesn't look right. Fix it or leave it blank.";
+    case "choice":
+      return question.field && a[question.field] ? null : "Pick one to continue.";
+    case "address":
+      if (!a.address.trim()) return "Please enter the street address.";
+      return /^\d{5}$/.test(a.zip.trim()) ? null : "Please enter a 5-digit ZIP code.";
+    case "details":
+      return null;
+  }
+}
+
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
+
+function LeadForm() {
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState<LeadAnswers>(EMPTY_ANSWERS);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<FormStatus>("idle");
+  const leadId = useRef<string>(newLeadId());
+  const touched = useRef(false);
+  const reduceMotion = useReducedMotion();
+
+  const total = QUESTIONS.length;
+  const question: Question = QUESTIONS[step] ?? FIRST_QUESTION;
+  const pct = status === "sent" ? 100 : Math.floor(((step + 1) / total) * 100);
+  const isLast = step === total - 1;
+
+  // Focus the new question's first input when it mounts (after the slide), never on first page load.
+  const stepRef = useCallback((node: HTMLDivElement | null): void => {
+    if (!node || !touched.current) return;
+    node.querySelector<HTMLElement>("input, textarea, button.choice")?.focus({ preventScroll: true });
+  }, []);
+
+  const set = <K extends keyof LeadAnswers>(key: K, value: LeadAnswers[K]): void => {
+    setAnswers((prev) => ({ ...prev, [key]: value }));
+    if (error) setError(null);
+  };
+
+  const send = useCallback(async (a: LeadAnswers, stage: "partial" | "complete", lastStep: number): Promise<boolean> => {
     const payload = {
-      name: String(data.get("name") ?? ""),
-      phone: String(data.get("phone") ?? ""),
-      service: String(data.get("service") ?? ""),
+      leadId: leadId.current,
+      stage,
+      lastStep: lastStep + 1,
+      totalSteps: QUESTIONS.length,
+      name: `${a.firstName.trim()} ${a.lastName.trim()}`.trim(),
+      firstName: a.firstName.trim(),
+      lastName: a.lastName.trim(),
+      phone: formatPhone(a.phone),
+      email: a.email.trim(),
+      service: a.service,
+      urgency: a.urgency,
+      ownership: a.ownership,
+      address: a.address.trim(),
+      zip: a.zip.trim(),
+      details: a.details.trim(),
+      smsConsent: a.smsConsent,
+      smsConsentText: a.smsConsent ? SMS_CONSENT_TEXT : "",
+      page: typeof window !== "undefined" ? window.location.href : "",
     };
-    setStatus("sending");
     try {
       const response = await fetch(T.business.leadEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        keepalive: true,
       });
-      if (response.ok) {
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const goNext = async (a: LeadAnswers = answers): Promise<void> => {
+    touched.current = true;
+    const problem = validateStep(question, a);
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    setError(null);
+
+    if (isLast) {
+      setStatus("sending");
+      const ok = await send(a, "complete", step);
+      if (ok) {
         setStatus("sent");
-        form.reset();
+        window.fbq?.("track", "Lead");
       } else {
         setStatus("error");
       }
-    } catch {
-      setStatus("error");
+      return;
     }
+
+    // Once we have a phone number, save progress after every step (fire and forget).
+    if (step >= PHONE_STEP) void send(a, "partial", step);
+    setStep((s) => Math.min(s + 1, total - 1));
   };
 
+  const goBack = (): void => {
+    touched.current = true;
+    setError(null);
+    setStep((s) => Math.max(s - 1, 0));
+  };
+
+  const pick = (field: ChoiceField, value: string): void => {
+    const next = { ...answers, [field]: value };
+    setAnswers(next);
+    void goNext(next);
+  };
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    void goNext();
+  };
+
+  if (status === "sent") {
+    return (
+      <div className="form form--steps glass" role="status" aria-live="polite">
+        <div className="form__track" aria-hidden="true">
+          <div className="form__bar" style={{ width: "100%" }} />
+        </div>
+        <div className="form__done">
+          <p className="form__count">All set</p>
+          <h2 className="form__q">Thanks, {answers.firstName.trim() || "there"}. We'll call you shortly.</h2>
+          <p className="form__hint">
+            Keep your phone close. We'll call {formatPhone(answers.phone)} from {T.business.phoneDisplay}.
+          </p>
+          <p className="form__note">
+            Emergency? Call now: <a href={T.business.phoneHref}>{T.business.phoneDisplay}</a>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const slide = reduceMotion ? {} : { initial: { opacity: 0, x: 24 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -24 } };
+
   return (
-    <form className="form glass" onSubmit={onSubmit}>
-      <div>
-        <h2 className="form__title">Get a call back fast</h2>
-        <p className="form__sub">Tell us what is going on. We will call you.</p>
+    <form className="form form--steps glass" onSubmit={onSubmit} noValidate aria-label="Request a call back">
+      <div className="form__top">
+        <span>{step === 0 ? "Let's go" : "Get a call back fast"}</span>
+        <span className="form__pct">{pct}%</span>
       </div>
-      <div className="field--pair">
-        <div className="field">
-          <label htmlFor="lead-name">Name</label>
-          <input id="lead-name" name="name" type="text" autoComplete="name" placeholder="Your name" required maxLength={120} />
-        </div>
-        <div className="field">
-          <label htmlFor="lead-phone">Phone</label>
-          <input id="lead-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="817-000-0000" required pattern="[0-9+()\-\s.]{10,20}" maxLength={40} />
-        </div>
+      <div className="form__track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="Form progress">
+        <div className="form__bar" style={{ width: `${pct}%` }} />
       </div>
-      <div className="field">
-        <label htmlFor="lead-service">Service</label>
-        <select id="lead-service" name="service" defaultValue={SERVICES[0]} aria-label="Service needed">
-          {SERVICES.map((service) => (
-            <option key={service} value={service}>
-              {service}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button className="submit" type="submit" disabled={status === "sending"}>
-        {status === "sending" ? "Sending…" : "Request a call"}
-      </button>
-      <p className="form__status" role="status" aria-live="polite">
-        {status === "sent" && "Received. We will call you shortly."}
-        {status === "error" && `Could not send. Please call ${T.business.phoneDisplay}.`}
+
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={step} ref={stepRef} className="form__step" transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} {...slide}>
+          <p className="form__count">
+            Question {step + 1} of {total}
+          </p>
+          <h2 className="form__q" id={`lead-q-${step}`}>
+            {question.title}
+          </h2>
+          <p className="form__hint">{question.hint}</p>
+
+          {question.kind === "name" && (
+            <div className="field--pair">
+              <div className="field">
+                <input aria-label="First name" name="firstName" type="text" autoComplete="given-name" placeholder="First name" maxLength={60} value={answers.firstName} onChange={(e) => set("firstName", e.target.value)} />
+              </div>
+              <div className="field">
+                <input aria-label="Last name" name="lastName" type="text" autoComplete="family-name" placeholder="Last name" maxLength={60} value={answers.lastName} onChange={(e) => set("lastName", e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          {question.kind === "phone" && (
+            <div className="field">
+              <input aria-label="Phone number" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="817-000-0000" maxLength={20} value={answers.phone} onChange={(e) => set("phone", formatPhone(e.target.value))} />
+            </div>
+          )}
+
+          {question.kind === "phone" && (
+            <label className="consent">
+              <input type="checkbox" name="smsConsent" checked={answers.smsConsent} onChange={(e) => set("smsConsent", e.target.checked)} />
+              <span>
+                {SMS_CONSENT_TEXT} See our <a href={T.business.privacyHref} target="_blank" rel="noopener">Privacy Policy</a> and{" "}
+                <a href={T.business.termsHref} target="_blank" rel="noopener">Terms</a>.
+              </span>
+            </label>
+          )}
+
+          {question.kind === "email" && (
+            <div className="field">
+              <input aria-label="Email" name="email" type="email" inputMode="email" autoComplete="email" placeholder="you@email.com" maxLength={120} value={answers.email} onChange={(e) => set("email", e.target.value)} />
+            </div>
+          )}
+
+          {question.kind === "choice" && question.field && question.options && (
+            <div className="choices" role="group" aria-labelledby={`lead-q-${step}`}>
+              {question.options.map((option) => {
+                const field = question.field as ChoiceField;
+                return (
+                  <button key={option} type="button" className="choice" aria-pressed={answers[field] === option} onClick={() => pick(field, option)}>
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {question.kind === "address" && (
+            <>
+              <div className="field">
+                <input aria-label="Street address" name="address" type="text" autoComplete="street-address" placeholder="Street address" maxLength={160} value={answers.address} onChange={(e) => set("address", e.target.value)} />
+              </div>
+              <div className="field field--zip">
+                <input aria-label="ZIP code" name="zip" type="text" inputMode="numeric" autoComplete="postal-code" placeholder="ZIP" maxLength={5} value={answers.zip} onChange={(e) => set("zip", digitsOnly(e.target.value).slice(0, 5))} />
+              </div>
+            </>
+          )}
+
+          {question.kind === "details" && (
+            <div className="field">
+              <textarea aria-label="Details" name="details" placeholder="Example: water pooling by the water heater since this morning." maxLength={1000} value={answers.details} onChange={(e) => set("details", e.target.value)} />
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      <p className="form__err" role="alert" aria-live="assertive">
+        {error ?? (status === "error" ? `Could not send. Please call ${T.business.phoneDisplay}.` : "")}
       </p>
+
+      <div className="form__nav">
+        <button type="button" className="form__back" onClick={goBack} hidden={step === 0}>
+          ← Back
+        </button>
+        {question.kind !== "choice" && (
+          <div className="form__go">
+            {question.kind !== "details" && <span className="form__enter">press Enter ↵</span>}
+            <button className="submit" type="submit" disabled={status === "sending"}>
+              {isLast ? (status === "sending" ? "Sending…" : "Request my call") : "Continue →"}
+            </button>
+          </div>
+        )}
+      </div>
+
       <p className="form__note">
         Emergency? Call <a href={T.business.phoneHref}>{T.business.phoneDisplay}</a>
       </p>
@@ -1624,6 +1983,9 @@ function Footer() {
           <div>
             <Logo onDark />
             <p className="footer__addr">{T.business.address}</p>
+            <p className="footer__addr">
+              <a href={`mailto:${T.business.email}`}>{T.business.email}</a>
+            </p>
             <div className="footer__social">
               <a href={T.business.facebook} target="_blank" rel="noopener noreferrer" aria-label="Cofulent Solutions on Facebook">
                 <FacebookIcon />
@@ -1637,6 +1999,11 @@ function Footer() {
             {T.business.phoneDisplay}
           </a>
         </div>
+        <nav className="footer__links" aria-label="Legal">
+          <a href={T.business.contactHref}>Contact</a>
+          <a href={T.business.privacyHref}>Privacy Policy</a>
+          <a href={T.business.termsHref}>Terms of Service</a>
+        </nav>
         <p className="footer__legal">© {new Date().getFullYear()} {T.business.name}. All rights reserved.</p>
       </div>
     </footer>
