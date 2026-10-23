@@ -10,6 +10,11 @@
 // (match on phone or leadId), not create a new one each time.
 // isFirstContact is true only on the first post that has a phone number: trigger
 // speed-to-lead (instant text/call) on that, not on every post.
+// timelineQualified is true when the job is within the client's window (2 weeks for Confluent).
+// It stays false until the timeline question (question 5) has been answered.
+
+// Keep in sync with TIMELINE_OPTIONS in src/App.tsx (the first two options).
+const QUALIFIED_TIMELINES: readonly string[] = ["As soon as possible", "Within 2 weeks"];
 
 interface Env {
   LEAD_WEBHOOK_URL?: string;
@@ -125,6 +130,8 @@ export const onRequestPost = async (context: { request: Request; env: Env }): Pr
       phoneE164: `+1${digits(lead.phone).slice(-10)}`,
       isFirstContact,
       isComplete: lead.stage === "complete",
+      timelineAnswered: lead.urgency !== "",
+      timelineQualified: QUALIFIED_TIMELINES.includes(lead.urgency),
       source: "cofulent-hero-form",
       receivedAt: new Date().toISOString(),
     }),
